@@ -17,10 +17,10 @@ export default function HomePage() {
             <Navigation />
             <Hero
                 title="Build smarter tools for modern teams"
-                subtitle="Streamline your workflow and boost productivity with intuitive solutions. Security, speed, and simplicity—all in one platform."
-                eyebrow="Next-Gen Productivity"
+                subtitle="At VELOCE, we design and develop innovative software solutions that empower businesses to grow, scale, and lead the future."
+                eyebrow="Build Tomorrow, Today."
                 ctaLabel="Get Started"
-                ctaHref="#"
+                ctaHref="#contact"
             />
             <FeaturesSection />
             <WaveSection />

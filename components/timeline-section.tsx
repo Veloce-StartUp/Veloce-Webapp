@@ -199,7 +199,7 @@ export function TimelineSection() {
                                   <Badge className="bg-green-600 hover:bg-green-700 text-white mb-2 sm:mb-0 w-fit">
                                     Stage {stage.stage}
                                   </Badge>
-                                  <span className="text-sm text-green-400 font-medium">{stage.duration}</span>
+                                  {/*<span className="text-sm text-green-400 font-medium">{stage.duration}</span>*/}
                                 </div>
                                 <h3 className="text-xl font-semibold text-white group-hover:text-green-400 transition-colors mb-2">
                                   {stage.title}

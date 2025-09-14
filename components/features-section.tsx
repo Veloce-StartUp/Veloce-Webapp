@@ -2,32 +2,32 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Card, CardContent } from "@/components/ui/card"
-import { Code, Zap, Globe, Shield, Rocket, Users } from "lucide-react"
+import {Code, Zap, Globe, Shield, Lock, Rocket, Users, IterationCw, Gauge} from "lucide-react"
 
 const features = [
   {
     icon: Code,
-    title: "Custom Development",
+    title: "Cutting-Edge Tech",
     description: "Tailored solutions built with cutting-edge technologies that perfectly fit your business needs.",
-    details: ["React & Next.js", "Node.js & Python", "Cloud Architecture", "API Development"],
+    details: ["React, Next.js, & etc", "Java, Node.js, Python & etc", "Cloud Architecture", "API Development"],
   },
   {
-    icon: Zap,
-    title: "Lightning Fast",
+    icon: Gauge,
+    title: "High Performance",
     description: "Optimized performance for exceptional user experiences with blazing-fast load times.",
     details: ["Performance Optimization", "CDN Integration", "Caching Strategies", "Speed Monitoring"],
   },
   {
-    icon: Globe,
-    title: "Global Scale",
-    description: "Solutions that scale from startup to enterprise, handling millions of users worldwide.",
-    details: ["Auto-scaling", "Load Balancing", "Global CDN", "Multi-region Deployment"],
+    icon: IterationCw,
+    title: "Agile & Adaptive",
+    description: "Flexible development approach that adapts to changing requirements and market conditions.",
+    details: ["Agile Methodology", "Adaptive Planning", "Quick Pivots", "Continuous Improvement"],
   },
   {
-    icon: Shield,
-    title: "Enterprise Security",
-    description: "Bank-level security with advanced encryption and compliance standards.",
-    details: ["SSL/TLS Encryption", "GDPR Compliance", "Security Audits", "Data Protection"],
+    icon: Lock,
+    title: "Quality & Security",
+    description: "Rigorous quality assurance processes combined with robust security measures for reliable and safe applications.",
+    details: ["Quality Assurance", "Security Testing", "Code Reviews", "Vulnerability Scanning"],
   },
   {
     icon: Rocket,
@@ -97,7 +97,7 @@ export function FeaturesSection() {
         <div className="container mx-auto px-4 relative z-20">
           <div className={`text-center mb-16 ${isVisible ? "animate-fade-in-up" : "opacity-0"} relative z-20`}>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-balance text-white">
-              Why Choose <span className="text-green-400">TechFlow</span>
+              Why Choose <span className="text-green-400">Veloce</span>
             </h2>
             <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto text-pretty">
               We're not just developers - we're your technology partners committed to delivering excellence.
@@ -112,7 +112,7 @@ export function FeaturesSection() {
               return (
                   <div
                       key={index}
-                      ref={(el) => (itemRefs.current[index] = el)}
+                      ref={(el) => {itemRefs.current[index] = el}}
                       data-index={index}
                       className={`${isVisible ? "animate-fade-in-up" : "opacity-0"} relative z-20`}
                   >

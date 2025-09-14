@@ -8,89 +8,47 @@ import { Linkedin, Twitter, Github, Mail, MapPin, Calendar } from "lucide-react"
 
 const teamMembers = [
   {
-    name: "Sarah Chen",
-    role: "CEO & Co-Founder",
-    bio: "Former VP of Engineering at Google. Passionate about building scalable systems and leading high-performing teams.",
-    image: "/professional-ceo-portrait.png",
-    location: "San Francisco, CA",
+    name: "Yohan Athukorala",
+    role: "CEO & Founder",
+    bio: "Passionate about building scalable systems and leading high-performing teams.",
+    image: "/yohan-nayanajith.jpeg",
+    location: "Colombo, Sri Lanka",
     experience: "12+ years",
-    skills: ["Leadership", "Strategy", "Product Vision"],
+    skills: ["Leadership", "Strategy", "Product Vision", "Full-Stack", "DevOps", "AI/ML"],
     social: {
-      linkedin: "#",
+      linkedin: "https://www.linkedin.com/in/yohan-nayanajith/",
       twitter: "#",
-      email: "sarah@techflow.com",
+      email: "yohannayanajith40@gmail.com",
     },
   },
   {
-    name: "Marcus Rodriguez",
-    role: "CTO & Co-Founder",
-    bio: "Full-stack architect with expertise in AI/ML and distributed systems. Previously led engineering at Uber.",
-    image: "/professional-cto-portrait.png",
-    location: "Austin, TX",
+    name: "Kumud Perera",
+    role: "CTO",
+    bio: "Full-stack architect with expertise in distributed systems.",
+    image: "/kumud-perera.jpeg",
+    location: "Colombo, Sri Lanka",
     experience: "15+ years",
-    skills: ["AI/ML", "Architecture", "DevOps"],
+    skills: ["UI/UX", "Backend", "Architecture", "DevOps"],
     social: {
-      linkedin: "#",
+      linkedin: "https://www.linkedin.com/in/kumud-perera-4559801a0/",
       github: "#",
-      email: "marcus@techflow.com",
+      email: "nethmalperera54@gmail.com",
     },
   },
   {
-    name: "Emily Watson",
-    role: "Head of Design",
-    bio: "Award-winning UX designer focused on creating intuitive and accessible user experiences.",
-    image: "/professional-woman-designer.png",
-    location: "New York, NY",
-    experience: "8+ years",
-    skills: ["UX Design", "Design Systems", "User Research"],
-    social: {
-      linkedin: "#",
-      twitter: "#",
-      email: "emily@techflow.com",
-    },
-  },
-  {
-    name: "David Kim",
-    role: "VP of Engineering",
-    bio: "Experienced engineering leader specializing in cloud infrastructure and security solutions.",
-    image: "/professional-engineer.png",
-    location: "Seattle, WA",
-    experience: "10+ years",
-    skills: ["Cloud Architecture", "Security", "Team Leadership"],
-    social: {
-      linkedin: "#",
-      github: "#",
-      email: "david@techflow.com",
-    },
-  },
-  {
-    name: "Lisa Thompson",
+    name: "Binali Ukwatte",
     role: "Head of Product",
     bio: "Product strategist with a track record of launching successful B2B and B2C products.",
-    image: "/professional-woman-product-manager.png",
+    image: "/binali-ukwatte.jpeg",
     location: "Boston, MA",
     experience: "9+ years",
-    skills: ["Product Strategy", "Market Research", "Analytics"],
+    skills: ["Product Strategy", "Market Research", "Analytics", "Business Analyst"],
     social: {
-      linkedin: "#",
+      linkedin: "https://www.linkedin.com/in/binali-ukwatte-56556a269/",
       twitter: "#",
-      email: "lisa@techflow.com",
+      email: "binaliukwatte@gmail.com",
     },
-  },
-  {
-    name: "Alex Johnson",
-    role: "Lead Data Scientist",
-    bio: "PhD in Machine Learning with expertise in NLP and computer vision applications.",
-    image: "/professional-person-data-scientist-portrait.jpg",
-    location: "Remote",
-    experience: "7+ years",
-    skills: ["Machine Learning", "Data Science", "Research"],
-    social: {
-      linkedin: "#",
-      github: "#",
-      email: "alex@techflow.com",
-    },
-  },
+  }
 ]
 
 export function TeamSection() {
@@ -139,23 +97,24 @@ export function TeamSection() {
                     onMouseLeave={() => setHoveredMember(null)}
                 >
                   {/* Profile Image */}
-                  <div className="relative h-64 overflow-hidden">
+                  <div className="relative h-64 md:h-96 overflow-hidden">
                     <img
                         src={member.image || "/placeholder.svg"}
                         alt={member.name}
-                        className="w-full h-full object-cover transition-all duration-700 group-hover:scale-125 group-hover:rotate-2"
+                        className="w-full h-full object-cover object-top transition-all duration-700 group-hover:scale-125 group-hover:rotate-2"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-green-500/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
 
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
 
                     {/* Social Links - Appear on Hover */}
-                    <div className="absolute bottom-4 left-4 right-4 flex justify-center space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+                    <div className="absolute bottom-4 left-4 right-4 flex justify-center space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 z-30">
                       {member.social.linkedin && (
                           <Button
                               size="icon"
                               variant="secondary"
                               className="h-8 w-8 modern-button-hover bg-gray-800 text-gray-300 hover:bg-green-600 hover:text-white"
+                              onClick={() => {window.open(member.social.linkedin)}}
                           >
                             <Linkedin className="h-4 w-4" />
                           </Button>
@@ -204,14 +163,14 @@ export function TeamSection() {
                     </div>
 
                     <div className="space-y-3">
-                      <div className="flex items-center text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
-                        <MapPin className="h-4 w-4 mr-2 text-green-400 group-hover:text-green-300 transition-colors" />
-                        {member.location}
-                      </div>
-                      <div className="flex items-center text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
-                        <Calendar className="h-4 w-4 mr-2 text-green-400 group-hover:text-green-300 transition-colors" />
-                        {member.experience}
-                      </div>
+                      {/*<div className="flex items-center text-sm text-gray-400 group-hover:text-gray-300 transition-colors">*/}
+                      {/*  <MapPin className="h-4 w-4 mr-2 text-green-400 group-hover:text-green-300 transition-colors" />*/}
+                      {/*  {member.location}*/}
+                      {/*</div>*/}
+                      {/*<div className="flex items-center text-sm text-gray-400 group-hover:text-gray-300 transition-colors">*/}
+                      {/*  <Calendar className="h-4 w-4 mr-2 text-green-400 group-hover:text-green-300 transition-colors" />*/}
+                      {/*  {member.experience}*/}
+                      {/*</div>*/}
 
                       <div className="flex flex-wrap gap-1">
                         {member.skills.map((skill, skillIndex) => (
@@ -234,18 +193,18 @@ export function TeamSection() {
             ))}
           </div>
 
-          <div
-              className={`text-center mt-12 ${isVisible ? "animate-fade-in-up" : "opacity-0"}`}
-              style={{ animationDelay: "0.8s" }}
-          >
-            <p className="text-gray-400 mb-6 text-lg">Want to join our amazing team?</p>
-            <Button
-                size="lg"
-                className="modern-button-hover bg-green-600 hover:bg-green-700 text-white hover:scale-105 transition-all duration-300"
-            >
-              View Open Positions
-            </Button>
-          </div>
+          {/*<div*/}
+          {/*    className={`text-center mt-12 ${isVisible ? "animate-fade-in-up" : "opacity-0"}`}*/}
+          {/*    style={{ animationDelay: "0.8s" }}*/}
+          {/*>*/}
+          {/*  <p className="text-gray-400 mb-6 text-lg">Want to join our amazing team?</p>*/}
+          {/*  <Button*/}
+          {/*      size="lg"*/}
+          {/*      className="modern-button-hover bg-green-600 hover:bg-green-700 text-white hover:scale-105 transition-all duration-300"*/}
+          {/*  >*/}
+          {/*    View Open Positions*/}
+          {/*  </Button>*/}
+          {/*</div>*/}
         </div>
       </section>
   )

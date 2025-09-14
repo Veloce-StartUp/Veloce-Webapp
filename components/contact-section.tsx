@@ -101,7 +101,7 @@ export function ContactSection() {
                       </p>
                     </div>
                   </div>
-                  <p className="text-green-400 font-medium">hello@techflow.com</p>
+                  <p className="text-green-400 font-medium">info@veloce-technology.com</p>
                 </CardContent>
               </Card>
 
@@ -117,37 +117,38 @@ export function ContactSection() {
                     <div>
                       <h3 className="font-semibold text-white group-hover:text-green-400 transition-colors">Call Us</h3>
                       <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
-                        Mon-Fri 9am-6pm PST
+                        Mon-Fri 9am-6pm IST
                       </p>
                     </div>
                   </div>
-                  <p className="text-green-400 font-medium">+1 (555) 123-4567</p>
+                  <p className="text-green-400 font-medium">+94 (76) 879-4004</p>
+                  <p className="text-green-400 font-medium">+94 (75) 865-7450</p>
                 </CardContent>
               </Card>
 
-              <Card
-                  className={`group modern-card-hover bg-gray-900/80 backdrop-blur-sm border border-gray-800 ${isVisible ? "animate-fade-in-left" : "opacity-0"}`}
-                  style={{ animationDelay: "0.2s" }}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mr-4 group-hover:bg-green-500/30 group-hover:scale-110 transition-all duration-300">
-                      <MapPin className="h-6 w-6 text-green-400 group-hover:text-green-300 transition-colors" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-white group-hover:text-green-400 transition-colors">Visit Us</h3>
-                      <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
-                        Our headquarters
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-green-400 font-medium">
-                    123 Innovation Drive
-                    <br />
-                    San Francisco, CA 94105
-                  </p>
-                </CardContent>
-              </Card>
+              {/*<Card*/}
+              {/*    className={`group modern-card-hover bg-gray-900/80 backdrop-blur-sm border border-gray-800 ${isVisible ? "animate-fade-in-left" : "opacity-0"}`}*/}
+              {/*    style={{ animationDelay: "0.2s" }}*/}
+              {/*>*/}
+              {/*  <CardContent className="p-6">*/}
+              {/*    <div className="flex items-center mb-4">*/}
+              {/*      <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mr-4 group-hover:bg-green-500/30 group-hover:scale-110 transition-all duration-300">*/}
+              {/*        <MapPin className="h-6 w-6 text-green-400 group-hover:text-green-300 transition-colors" />*/}
+              {/*      </div>*/}
+              {/*      <div>*/}
+              {/*        <h3 className="font-semibold text-white group-hover:text-green-400 transition-colors">Visit Us</h3>*/}
+              {/*        <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">*/}
+              {/*          Our headquarters*/}
+              {/*        </p>*/}
+              {/*      </div>*/}
+              {/*    </div>*/}
+              {/*    <p className="text-green-400 font-medium">*/}
+              {/*      123 Innovation Drive*/}
+              {/*      <br />*/}
+              {/*      San Francisco, CA 94105*/}
+              {/*    </p>*/}
+              {/*  </CardContent>*/}
+              {/*</Card>*/}
 
               <Card
                   className={`group modern-card-hover bg-gray-900/80 backdrop-blur-sm border border-gray-800 ${isVisible ? "animate-fade-in-left" : "opacity-0"}`}
@@ -161,7 +162,7 @@ export function ContactSection() {
                     <div>
                       <h3 className="font-semibold text-white group-hover:text-green-400 transition-colors">Business Hours</h3>
                       <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
-                        Pacific Standard Time
+                        Indian Standard Time
                       </p>
                     </div>
                   </div>

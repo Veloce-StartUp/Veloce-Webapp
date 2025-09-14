@@ -16,7 +16,7 @@ export function Hero({
                          title,
                          subtitle,
                          ctaLabel = "Explore Now",
-                         ctaHref = "#",
+                         ctaHref = "#contact",
                      }: HeroProps) {
     return (
         <section
@@ -44,18 +44,18 @@ export function Hero({
             />
 
             {/* Content container with proper z-index */}
-            <div className="relative z-10"> {/* Added z-10 here */}
+            <div className="relative z-10 "> {/* Added z-10 here */}
                 {/* Eyebrow */}
                 {eyebrow && (
-                    <a href="#" className="group">
+                    <a href="#contact" className="group">
             <span
                 className="text-sm text-gray-400 font-geist mx-auto px-5 py-2
               bg-gradient-to-tr from-gray-800/5 via-gray-700/5 to-transparent
               border-[2px] border-gray-700/20
-              rounded-3xl w-fit tracking-tight uppercase flex items-center justify-center"
+              rounded-3xl w-fit tracking-tight uppercase flex items-center justify-center group-hover:text-white group-hover:border-white"
             >
               {eyebrow}
-                <ChevronRight className="inline w-4 h-4 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
+                <ChevronRight className="inline w-4 h-4 ml-2 transition-transform duration-300 group-hover:translate-x-1 " />
             </span>
                     </a>
                 )}

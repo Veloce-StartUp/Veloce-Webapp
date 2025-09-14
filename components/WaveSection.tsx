@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 // --- Text Arc Component ---
 const CentralLogo = () => (
     <img
-        src="https://res.cloudinary.com/druqq6b0a/image/upload/v1757719059/VELOCE_Digital_Company_Logo_1_dyoxdw.png"
+        src="https://res.cloudinary.com/druqq6b0a/image/upload/v1757878293/VELOCE_Digital_Company_Logo_2_worjb4.png"
         alt="Logo"
         className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover shadow-lg"
         onError={(e) => {
@@ -168,9 +168,9 @@ export default function WaveSection() {
                 </div>
 
                 {/* Call to action */}
-                <button className="mt-8 md:mt-12 px-6 py-3 md:px-8 md:py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-green-500/25">
-                    Explore Our Work
-                </button>
+                {/*<button className="mt-8 md:mt-12 px-6 py-3 md:px-8 md:py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-green-500/25">*/}
+                {/*    Explore Our Work*/}
+                {/*</button>*/}
             </div>
 
             {/* Adding custom styles for font */}

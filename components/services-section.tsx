@@ -11,7 +11,7 @@ const services = [
     icon: Globe,
     title: "Web Development",
     description: "Modern, responsive websites and web applications built with the latest technologies.",
-    features: ["React & Next.js", "Progressive Web Apps", "E-commerce Solutions", "CMS Integration"],
+    features: ["React, Next.js, Java, Node.js, Python & etc", "E-commerce Solutions", "Progressive Web Apps", "CMS Integration"],
     color: "from-green-500 to-emerald-500",
   },
   {
@@ -106,7 +106,7 @@ export function ServicesSection() {
               Our <span className="text-green-400">Services</span>
             </h2>
             <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto text-pretty">
-              Comprehensive technology solutions tailored to drive your business forward in the digital age.
+              We don’t just build software. We build the future of your business.
             </p>
           </div>
 
@@ -154,13 +154,13 @@ export function ServicesSection() {
                         ))}
                       </ul>
 
-                      <Button
-                          variant="ghost"
-                          className="w-full modern-button-hover bg-gray-800 text-gray-300 group-hover:bg-green-600 group-hover:text-white transition-all duration-300"
-                      >
-                        Learn More
-                        <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-2 transition-transform duration-300" />
-                      </Button>
+                      {/*<Button*/}
+                      {/*    variant="ghost"*/}
+                      {/*    className="w-full modern-button-hover bg-gray-800 text-gray-300 group-hover:bg-green-600 group-hover:text-white transition-all duration-300"*/}
+                      {/*>*/}
+                      {/*  Learn More*/}
+                      {/*  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-2 transition-transform duration-300" />*/}
+                      {/*</Button>*/}
                     </CardContent>
 
                     {hoveredIndex === index && (
