@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image";
 
 export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -26,7 +27,15 @@ export function Navigation() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold text-white">
-            Veloce
+            <div className="w-20 h-12 relative flex items-center justify-center rounded-md">
+              <Image
+                  src="/Veloce-Logo_White.png"
+                  alt="CSSL Logo"
+                  fill
+                  className="object-contain dark:invert-[0.1] dark:brightness-0 dark:invert"
+                  priority
+              />
+            </div>
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">
