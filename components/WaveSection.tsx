@@ -173,14 +173,7 @@ export default function WaveSection() {
                 {/*</button>*/}
             </div>
 
-            {/* Adding custom styles for font */}
-            <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-        
-        .font-pixelated {
-          font-family: 'VT323', monospace;
-        }
-      `}</style>
+
         </section>
     );
 }

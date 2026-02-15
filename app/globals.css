@@ -528,3 +528,6 @@ button, a, input, select, textarea,
     transform: translateY(0);
   }
 }
+.font-pixelated {
+  font-family: var(--font-vt323), monospace;
+}
