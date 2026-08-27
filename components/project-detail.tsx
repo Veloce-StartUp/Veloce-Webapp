@@ -10,9 +10,12 @@ import {
   Building,
   CalendarDays,
   CheckCircle2,
+  Clock,
   ExternalLink,
   Globe,
   Layers,
+  Mail,
+  MessageSquare,
   Smartphone,
   Sparkles,
 } from "lucide-react";
@@ -307,8 +310,28 @@ export function ProjectDetail({ slug }: ProjectDetailProps) {
         )}
 
         {/* CTA */}
-        <Card className="border border-green-500/30 bg-gradient-to-br from-green-950/40 to-gray-900/80 backdrop-blur-sm mb-20">
-          <CardContent className="p-8 md:p-12 text-center">
+        <div className="relative overflow-hidden rounded-3xl border border-green-500/20 bg-gradient-to-br from-gray-900 via-gray-900 to-green-950/30 mb-20">
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute -top-24 -left-24 w-72 h-72 bg-green-500/10 rounded-full blur-3xl float-animation" />
+            <div
+              className="absolute -bottom-24 -right-24 w-72 h-72 bg-green-400/10 rounded-full blur-3xl float-animation"
+              style={{ animationDelay: "2s" }}
+            />
+            <div
+              className="absolute inset-0 opacity-[0.04]"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle, #ffffff 1px, transparent 1px)",
+                backgroundSize: "28px 28px",
+              }}
+            />
+          </div>
+
+          <div className="relative z-10 px-6 py-16 md:py-20 text-center">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-green-500/10 border border-green-500/30 mb-6">
+              <MessageSquare className="h-7 w-7 text-green-400" />
+            </div>
+
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 text-balance">
               Have a similar project in mind?
             </h2>
@@ -316,17 +339,45 @@ export function ProjectDetail({ slug }: ProjectDetailProps) {
               Tell us what you are building and we will map out how to get it
               designed, built and shipped.
             </p>
-            <Link href="/contact">
-              <Button
-                size="lg"
-                className="group modern-button-hover bg-green-600 hover:bg-green-700 text-white hover:scale-105 transition-all duration-300"
-              >
-                Start a Conversation
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+
+            <div className="flex flex-wrap items-center justify-center gap-4 mb-10">
+              <Link href="/contact">
+                <Button
+                  size="lg"
+                  className="group modern-button-hover bg-green-600 hover:bg-green-700 text-white hover:scale-105 transition-all duration-300"
+                >
+                  Start a Conversation
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+              <a href="mailto:build.veloce@gmail.com">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="group border-green-500/40 text-green-400 hover:bg-green-600 hover:text-white bg-transparent hover:scale-105 transition-all duration-300"
+                >
+                  <Mail className="mr-2 h-4 w-4" />
+                  Email Us
+                </Button>
+              </a>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-gray-500">
+              <span className="inline-flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-400" />
+                Free consultation
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <Clock className="h-4 w-4 text-green-400" />
+                Replies within 24h
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-green-400" />
+                Tailored proposal
+              </span>
+            </div>
+          </div>
+        </div>
 
         {/* Related projects */}
         {relatedProjects.length > 0 && (
