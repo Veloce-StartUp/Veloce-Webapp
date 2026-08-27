@@ -14,6 +14,7 @@ import {
   Globe,
   Heart,
 } from "lucide-react";
+import Link from "next/link";
 import { DottedSurface } from "@/components/ui/dotted-surface";
 
 export function Footer() {
@@ -202,24 +203,18 @@ export function Footer() {
               for innovation.
             </div>
             <div className="flex flex-wrap justify-center md:justify-end space-x-6 text-sm">
-              <a
-                href="#"
+              <Link
+                href="/privacy-policy"
                 className="text-gray-500 hover:text-green-400 transition-colors"
               >
                 Privacy Policy
-              </a>
-              <a
-                href="#"
+              </Link>
+              <Link
+                href="/terms-of-service"
                 className="text-gray-500 hover:text-green-400 transition-colors"
               >
                 Terms of Service
-              </a>
-              <a
-                href="#"
-                className="text-gray-500 hover:text-green-400 transition-colors"
-              >
-                Cookie Policy
-              </a>
+              </Link>
             </div>
           </div>
         </div>

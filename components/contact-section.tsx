@@ -148,7 +148,7 @@ export function ContactSection() {
                   </div>
                 </div>
                 <p className="text-green-400 font-medium">
-                  info@veloce-technology.com
+                  build.veloce@gmail.com
                 </p>
               </CardContent>
             </Card>

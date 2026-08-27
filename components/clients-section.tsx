@@ -34,6 +34,12 @@ const clients = [
     website: "https://claytonfmc.com.au/",
     alt: "Clayton Family Medical Centre",
   },
+  {
+    name: "Logic Leaf Technologies",
+    logo: "/logo-cropped.png",
+    website: "https://logicleaftechnologies.com",
+    alt: "Logic Leaf Technologies",
+  },
 ];
 
 export function ClientsSection() {

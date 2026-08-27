@@ -54,7 +54,7 @@ export function Navigation() {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 transition-all duration-300 group-hover:w-full"></span>
             </Link>
             <Link
-              href="#products"
+              href="/products"
               className="text-gray-300 hover:text-green-400 transition-all duration-300 hover:scale-105 relative group"
             >
               Products
@@ -118,7 +118,7 @@ export function Navigation() {
                 Services
               </Link>
               <Link
-                href="#products"
+                href="/products"
                 className="text-left text-gray-300 hover:text-green-400 transition-all duration-300 hover:translate-x-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
