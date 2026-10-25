@@ -24,6 +24,8 @@ export function DottedSurface({ className, dotColor = 'white', ...props }: Dotte
 		const SEPARATION = 150;
 		const AMOUNTX = 40;
 		const AMOUNTY = 60;
+		// Wave phase per second: the original 0.1 per frame at 60 fps.
+		const WAVE_SPEED = 6;
 
 		// Scene setup
 		const scene = new THREE.Scene();
@@ -41,7 +43,8 @@ export function DottedSurface({ className, dotColor = 'white', ...props }: Dotte
 			alpha: true,
 			antialias: true,
 		});
-		renderer.setPixelRatio(window.devicePixelRatio);
+		// Points look the same above 2x; rendering at 3x on phones only costs GPU time.
+		renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 		renderer.setSize(containerRef.current.offsetWidth, containerRef.current.offsetHeight);
 		renderer.setClearColor(0x000000, 0);
 
@@ -95,11 +98,18 @@ export function DottedSurface({ className, dotColor = 'white', ...props }: Dotte
 		scene.add(points);
 
 		let count = 0;
-		let animationId: number;
+		let animationId = 0;
+		let visible = false;
+		let lastTime: number | null = null;
 
-		// Animation function
-		const animate = () => {
+		// Animation function (runs only while the surface is on screen)
+		const animate = (time: number) => {
+			if (!visible) return;
 			animationId = requestAnimationFrame(animate);
+
+			// Advance by elapsed time rather than per frame, so the wave keeps the same pace on 60 Hz and 120 Hz screens.
+			const elapsed = lastTime === null ? 0 : Math.min((time - lastTime) / 1000, 0.1);
+			lastTime = time;
 
 			const positionAttribute = geometry.attributes.position;
 			const positions = positionAttribute.array as Float32Array;
@@ -120,22 +130,31 @@ export function DottedSurface({ className, dotColor = 'white', ...props }: Dotte
 
 			positionAttribute.needsUpdate = true;
 			renderer.render(scene, camera);
-			count += 0.1;
+			count += elapsed * WAVE_SPEED;
 		};
 
 		// Handle window resize
 		const handleResize = () => {
 			if (!containerRef.current) return;
 
-			camera.aspect = containerRef.current.offsetWidth / containerRef.current.offsetHeight;
+			// Keep the viewport's shape, as on first render: the view is stretched over the canvas,
+			// so the wave always fills the canvas's lower half and the canvas height sets how tall it looks.
+			camera.aspect = window.innerWidth / window.innerHeight;
 			camera.updateProjectionMatrix();
 			renderer.setSize(containerRef.current.offsetWidth, containerRef.current.offsetHeight);
 		};
 
 		window.addEventListener('resize', handleResize);
 
-		// Start animation
-		animate();
+		// Start animating when the surface scrolls into view, stop when it leaves.
+		const visibilityObserver = new IntersectionObserver(([entry]) => {
+			visible = entry.isIntersecting;
+			cancelAnimationFrame(animationId);
+			if (!visible) return;
+			lastTime = null;
+			animationId = requestAnimationFrame(animate);
+		});
+		visibilityObserver.observe(containerRef.current);
 
 		// Store references
 		sceneRef.current = {
@@ -150,9 +169,10 @@ export function DottedSurface({ className, dotColor = 'white', ...props }: Dotte
 		// Cleanup function
 		return () => {
 			window.removeEventListener('resize', handleResize);
+			visibilityObserver.disconnect();
+			cancelAnimationFrame(animationId);
 
 			if (sceneRef.current) {
-				cancelAnimationFrame(sceneRef.current.animationId);
 
 				// Clean up Three.js objects
 				sceneRef.current.scene.traverse((object) => {

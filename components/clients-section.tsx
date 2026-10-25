@@ -1,9 +1,21 @@
 "use client";
 
+import { useRef } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { gsap, playWhileVisible, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { SectionHeading } from "@/components/section-heading";
+import { cn } from "@/lib/utils";
 
-const clients = [
+interface Client {
+  name: string;
+  logo: string;
+  website: string;
+  alt: string;
+  /** For logos made for dark backgrounds (default tile is white). */
+  tileClassName?: string;
+}
+
+const clients: Client[] = [
   {
     name: "CSSL",
     logo: "/cssl-logo.png",
@@ -11,10 +23,23 @@ const clients = [
     alt: "Computer Society of Sri Lanka",
   },
   {
-    name: "NITC",
+    name: "NITC 2025",
     logo: "/NITC-logo.png",
+    website: "https://nitc.lk/nitc-2025",
+    alt: "National IT Conference 2025",
+  },
+  {
+    name: "SLANSHEI",
+    logo: "/slanshei-logo.png",
+    website: "https://www.slanshei.lk",
+    alt: "Sri Lanka Association of Non-State Higher Education Institutes",
+  },
+  {
+    name: "NITC 2026",
+    logo: "/nitc-2026-logo.png",
     website: "https://nitc.lk",
-    alt: "National IT Conference",
+    alt: "National IT Conference 2026",
+    tileClassName: "bg-[#0b2a6b]",
   },
   {
     name: "FITIS",
@@ -42,100 +67,122 @@ const clients = [
   },
 ];
 
+/** The track holds three copies so it can loop seamlessly on wide screens. */
+const COPIES = 3;
+
 export function ClientsSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      const track = trackRef.current!;
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      const loop = gsap.to(track, {
+        xPercent: -100 / COPIES,
+        ease: "none",
+        duration: 45,
+        repeat: -1,
+      });
+      // Start deep into the loop so scrolling up can play it backwards.
+      loop.totalTime(loop.duration() * 100);
+      playWhileVisible(loop, sectionRef.current!);
+
+      // Scroll speed pushes the marquee along (and backwards when scrolling up).
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: "top bottom",
+        end: "bottom top",
+        onUpdate: (self) => {
+          const boost = gsap.utils.clamp(-6, 6, self.getVelocity() / 250);
+          gsap.to(loop, {
+            timeScale: (boost < 0 ? -1 : 1) * (1 + Math.abs(boost)),
+            duration: 0.25,
+            overwrite: true,
+          });
+          gsap.to(loop, { timeScale: 1, duration: 1.2, delay: 0.3, ease: "power2.out" });
+        },
+      });
+
+      const pause = () => gsap.to(loop, { timeScale: 0, duration: 0.6, overwrite: true });
+      const resume = () => gsap.to(loop, { timeScale: 1, duration: 0.6, overwrite: true });
+      track.addEventListener("pointerenter", pause);
+      track.addEventListener("pointerleave", resume);
+
+      return () => {
+        track.removeEventListener("pointerenter", pause);
+        track.removeEventListener("pointerleave", resume);
+      };
+    },
+    { scope: sectionRef },
+  );
+
   return (
-    <section className="py-20 bg-black relative overflow-hidden border-b border-white/5">
-      <div className="container mx-auto px-4 mb-12 relative z-20">
-        <div className="text-center">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-balance text-white">
-            We Work With <span className="text-green-400">The Best</span>
-          </h2>
-          <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto text-pretty">
-            Proud to partner with leading organizations innovation.
-          </p>
-        </div>
+    <section ref={sectionRef} id="clients" className="relative overflow-hidden py-24">
+      <div className="container relative z-20 mx-auto px-4">
+        <SectionHeading
+          title={
+            <>
+              We Work With <span className="text-gradient-green">The Best</span>
+            </>
+          }
+          description="Proud to partner with leading organizations driving innovation."
+          className="mb-14 md:mb-16"
+        />
       </div>
 
-      {/* Marquee Container */}
-      <div className="relative w-full overflow-hidden z-20">
-        {/* Gradient Masks for Fade Effeect */}
-        <div className="absolute left-0 top-0 bottom-0 w-20 md:w-40 z-20 bg-gradient-to-r from-black to-transparent" />
-        <div className="absolute right-0 top-0 bottom-0 w-20 md:w-40 z-20 bg-gradient-to-l from-black to-transparent" />
-
-        {/* Marquee Track */}
-        <div className="flex w-max animate-infinite-scroll hover:pause">
-          {/* First set of items */}
-          <div className="flex items-center gap-8 md:gap-16 px-4 md:px-8 z-50">
-            {clients.map((client, index) => (
-              <ClientCard key={`client-1-${index}`} client={client} />
-            ))}
-          </div>
-          {/* Duplicate set for seamless looping */}
-          <div
-            className="flex items-center gap-8 md:gap-16 px-4 md:px-8 z-50"
-            aria-hidden="true"
-          >
-            {clients.map((client, index) => (
-              <ClientCard key={`client-2-${index}`} client={client} />
-            ))}
-          </div>
-          {/* Triplicate set for wide screens to ensure no gaps */}
-          <div
-            className="flex items-center gap-8 md:gap-16 px-4 md:px-8 z-50"
-            aria-hidden="true"
-          >
-            {clients.map((client, index) => (
-              <ClientCard key={`client-3-${index}`} client={client} />
-            ))}
-          </div>
+      <div
+        data-reveal="fade"
+        className="relative z-20 w-full overflow-hidden py-4 [mask-image:linear-gradient(to_right,transparent,#000_12%,#000_88%,transparent)]"
+      >
+        <div ref={trackRef} className="flex w-max">
+          {Array.from({ length: COPIES }, (_, copy) => (
+            <div
+              key={copy}
+              className="flex items-start gap-6 px-3 md:gap-10 md:px-5"
+              aria-hidden={copy > 0}
+            >
+              {clients.map((client) => (
+                <ClientCard key={client.name} client={client} focusable={copy === 0} />
+              ))}
+            </div>
+          ))}
         </div>
       </div>
-
-      {/* Inline styles for the animation if not in globals.css */}
-      <style jsx>{`
-        @keyframes infinite-scroll {
-          from {
-            transform: translateX(0);
-          }
-          to {
-            transform: translateX(-33.33%); /* Move 1/3 since we have 3 sets */
-          }
-        }
-        .animate-infinite-scroll {
-          animation: infinite-scroll 40s linear infinite;
-        }
-        .hover\\:pause:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
     </section>
   );
 }
 
-function ClientCard({ client }: { client: (typeof clients)[0] }) {
+function ClientCard({
+  client,
+  focusable,
+}: {
+  client: Client;
+  focusable: boolean;
+}) {
   return (
-    <Link
+    <a
       href={client.website}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative flex-shrink-0"
+      tabIndex={focusable ? undefined : -1}
+      className="group/logo block w-44 shrink-0 md:w-60"
     >
-      <div className="w-48 h-28 md:w-64 md:h-36 bg-black border border-gray-800 rounded-xl p-6 flex flex-col items-center justify-center transition-all duration-300 group-hover:border-green-500/50 group-hover:shadow-[0_0_20px_-5px_rgba(74,222,128,0.2)]">
-        {/* White background container for logo properly */}
-        <div className="relative w-full h-full bg-white rounded-lg p-3 flex items-center justify-center overflow-hidden">
+      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-all duration-500 group-hover/logo:-translate-y-1 group-hover/logo:border-green-400/40 group-hover/logo:bg-green-500/[0.07] group-hover/logo:shadow-[0_24px_40px_-20px_rgba(74,222,128,0.5)]">
+        <div className={cn("relative h-20 overflow-hidden rounded-xl bg-white md:h-24", client.tileClassName)}>
           <Image
             src={client.logo}
             alt={client.alt}
             fill
-            className="object-contain p-2 transition-transform duration-500 group-hover:scale-110"
+            sizes="240px"
+            className="object-contain p-4 transition-transform duration-500 group-hover/logo:scale-105"
           />
         </div>
       </div>
-
-      {/* Tooltip-like text on hover */}
-      <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap text-green-400 text-sm font-medium">
+      <p className="mt-3 truncate px-2 text-center text-[11px] uppercase tracking-[0.16em] text-gray-400 transition-colors group-hover/logo:text-green-300">
         {client.name}
-      </div>
-    </Link>
+      </p>
+    </a>
   );
 }

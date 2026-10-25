@@ -3,16 +3,30 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Analytics } from "@vercel/analytics/next";
-import { Suspense } from "react";
 import "./globals.css";
 import { SplashCursor } from "@/components/ui/splash-cursor";
+import { AmbientBackground } from "@/components/ambient-background";
+import { Navigation } from "@/components/navigation";
+import { ScrollToTop } from "@/components/scroll-to-top";
+import { SmoothScroll } from "@/components/motion/smooth-scroll";
+import { ChapterIndex } from "@/components/chapters/chapter-index";
+import { ScrollRuler } from "@/components/chapters/scroll-ruler";
+import { SocialRail } from "@/components/social-rail";
 
-import { VT323 } from "next/font/google";
+import { Instrument_Serif, VT323 } from "next/font/google";
 
 const vt323 = VT323({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-vt323",
+});
+
+/** Serif italic for the highlighted words in headlines. */
+const instrumentSerif = Instrument_Serif({
+  weight: "400",
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  variable: "--font-instrument-serif",
 });
 
 export const metadata: Metadata = {
@@ -99,22 +113,31 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${GeistSans.variable} ${GeistMono.variable} ${vt323.variable}`}
+      className={`${GeistSans.variable} ${GeistMono.variable} ${vt323.variable} ${instrumentSerif.variable}`}
       suppressHydrationWarning
     >
       <head>
         <meta name="theme-color" content="#000000" />
+        <noscript>
+          <style>{`[data-reveal],.hero-root [data-hero]{opacity:1!important}[data-split]{visibility:visible!important}`}</style>
+        </noscript>
       </head>
       <body
-        className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${vt323.variable}`}
+        className={`font-sans bg-black text-white antialiased ${GeistSans.variable} ${GeistMono.variable} ${vt323.variable}`}
         suppressHydrationWarning={true}
       >
+        <AmbientBackground />
         <SplashCursor
           SPLAT_FORCE={1500}
           SPLAT_RADIUS={0.1}
           DISABLE_ON_INTERACTIVE={true}
         />
-        <Suspense fallback={null}>{children}</Suspense>
+        <Navigation />
+        <SmoothScroll>{children}</SmoothScroll>
+        <ChapterIndex />
+        <ScrollRuler />
+        <SocialRail />
+        <ScrollToTop />
         <Analytics />
         <Toaster />
       </body>

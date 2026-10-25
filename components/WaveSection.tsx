@@ -1,13 +1,37 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { Cloud, Globe, Smartphone } from 'lucide-react';
 import { WavePath } from "@/components/ui/wave-path";
-import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { gsap, playWhileVisible, ScrollTrigger, useGSAP } from '@/lib/gsap';
+
+const STATEMENT =
+    "Transforming ideas into cutting-edge digital experiences. Our solutions blend creativity with technology to build the future today.";
+
+/** Words that land in green once the statement lights up. */
+const EMPHASIS = new Set(["cutting-edge", "digital", "experiences.", "future", "today."]);
+
+const pillars = [
+    {
+        icon: Globe,
+        title: "Web Development",
+        description: "Modern, responsive websites built with the latest technologies for optimal performance.",
+    },
+    {
+        icon: Smartphone,
+        title: "Mobile Applications",
+        description: "Native and cross-platform apps that deliver seamless experiences across all devices.",
+    },
+    {
+        icon: Cloud,
+        title: "Cloud Solutions",
+        description: "Scalable infrastructure and services to power your business in the cloud era.",
+    },
+];
 
 // --- Text Arc Component ---
 const CentralLogo = () => (
     <img
-        src="https://res.cloudinary.com/druqq6b0a/image/upload/v1757878293/VELOCE_Digital_Company_Logo_2_worjb4.png"
+        src="https://res.cloudinary.com/druqq6b0a/image/upload/f_auto,q_auto,w_192/v1757878293/VELOCE_Digital_Company_Logo_2_worjb4.png"
         alt="Logo"
         className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover shadow-lg"
         onError={(e) => {
@@ -70,26 +94,13 @@ const TextArcEffect = () => {
     return (
         <div className="flex items-center justify-center w-full">
             <div className="relative flex items-center justify-center">
-                <motion.div
-                    className="absolute pointer-events-none"
-                    animate={{ rotate: 360 }}
-                    transition={{
-                        repeat: Infinity,
-                        duration: 20,
-                        ease: 'linear',
-                    }}
-                >
+                <div className="text-arc absolute pointer-events-none">
                     <TextArc text={text} diameter={diameter} />
-                </motion.div>
+                </div>
 
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                >
+                <div className="glass flex items-center justify-center rounded-full p-3 shadow-[0_0_60px_-10px_rgba(74,222,128,0.6)] transition-transform duration-500 hover:rotate-6 hover:scale-110">
                     <CentralLogo />
-                </motion.div>
+                </div>
             </div>
         </div>
     );
@@ -97,83 +108,93 @@ const TextArcEffect = () => {
 
 // --- Main Wave Section ---
 export default function WaveSection() {
+    const sectionRef = useRef<HTMLElement>(null);
+
+    useGSAP(
+        () => {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            // Words brighten one by one as the statement scrolls through the viewport.
+            gsap.fromTo(
+                '.statement-word',
+                { opacity: 0.14 },
+                {
+                    opacity: 1,
+                    ease: 'none',
+                    stagger: 0.1,
+                    scrollTrigger: {
+                        trigger: '.statement',
+                        start: 'top 85%',
+                        end: 'bottom 45%',
+                        scrub: true,
+                    },
+                },
+            );
+
+            // The arc spins steadily, faster while the page is scrolling.
+            const spin = gsap.to('.text-arc', { rotate: 360, duration: 20, ease: 'none', repeat: -1 });
+            playWhileVisible(spin, sectionRef.current!);
+            ScrollTrigger.create({
+                trigger: sectionRef.current,
+                start: 'top bottom',
+                end: 'bottom top',
+                onUpdate: (self) => {
+                    const boost = Math.min(Math.abs(self.getVelocity()) / 200, 8);
+                    gsap.to(spin, { timeScale: 1 + boost, duration: 0.2, overwrite: true });
+                    gsap.to(spin, { timeScale: 1, duration: 1.4, delay: 0.25, ease: 'power2.out' });
+                },
+            });
+        },
+        { scope: sectionRef },
+    );
+
     return (
-        <section className="relative w-full min-h-screen flex flex-col items-center justify-center bg-black text-white overflow-hidden px-4 py-12 md:py-20">
-            {/* Background effects */}
+        <section ref={sectionRef} className="relative w-full overflow-hidden px-4 py-24 text-white md:py-32">
             <div
                 aria-hidden="true"
-                className={cn(
-                    'pointer-events-none absolute -top-10 left-1/2 size-full -translate-x-1/2 rounded-full',
-                    'bg-[radial-gradient(ellipse_at_center,rgba(0,255,128,0.1),transparent_50%)]',
-                    'blur-[30px]',
-                )}
+                className="pointer-events-none absolute left-1/2 top-1/2 h-[70%] w-[80%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(0,255,128,0.04),transparent_60%)] blur-[30px]"
             />
 
-            {/* Animated gradient elements */}
-            <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute top-10 left-10 w-32 h-32 bg-green-500/5 rounded-full blur-xl animate-pulse" />
-                <div
-                    className="absolute bottom-20 right-20 w-40 h-40 bg-green-400/5 rounded-full blur-2xl animate-pulse"
-                    style={{ animationDelay: "2s" }}
-                />
-                <div
-                    className="absolute top-1/2 left-1/3 w-24 h-24 bg-green-600/5 rounded-full blur-lg animate-pulse"
-                    style={{ animationDelay: "4s" }}
-                />
+            <div className="container relative z-10 mx-auto lg:w-[70vw] lg:max-w-none">
+                {/* Wave path with green accent: across the full width of the section, shorter on phones */}
+                <div className="mb-16 w-full md:mb-24">
+                    <WavePath className="mx-auto w-[70%] text-green-400 md:w-full" />
+                </div>
+
+                <div className="grid items-center gap-14 lg:grid-cols-[auto_1fr] lg:gap-20">
+                    <div data-reveal="scale" className="mx-auto lg:ml-10">
+                        <TextArcEffect />
+                    </div>
+
+                    <p className="statement text-balance text-center text-3xl font-medium leading-tight tracking-tight md:text-5xl lg:text-right lg:text-[3.4rem]">
+                        {STATEMENT.split(' ').map((word, index) => (
+                            <React.Fragment key={index}>
+                                {index > 0 && ' '}
+                                <span
+                                    className={`statement-word inline-block ${EMPHASIS.has(word) ? 'text-gradient-green' : 'text-white'}`}
+                                >
+                                    {word}
+                                </span>
+                            </React.Fragment>
+                        ))}
+                    </p>
+                </div>
+
+                <div className="mt-20 grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
+                    {pillars.map((pillar) => {
+                        const Icon = pillar.icon;
+                        return (
+                            <div key={pillar.title} data-reveal className="glass spotlight group rounded-3xl p-6 md:p-8">
+                                <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl border border-green-400/25 bg-green-500/10 text-green-400 transition-transform duration-500 group-hover:scale-110">
+                                    <Icon className="h-5 w-5" />
+                                </div>
+                                <h3 className="mb-3 text-lg font-semibold text-green-400">{pillar.title}</h3>
+                                <p className="text-gray-300">{pillar.description}</p>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
-
-            <div className="flex w-full md:w-[70vw] flex-col items-center md:items-end z-10">
-                {/* Wave path with green accent */}
-                <div className="w-full mb-20">
-                    <WavePath className="text-green-400 w-full" />
-                </div>
-
-                <div className="flex w-full flex-col items-center md:items-end">
-                    <div className="flex flex-col md:flex-row items-center md:items-center md:justify-between w-full gap-6 md:gap-8">
-                        {/* Text Arc Component */}
-                        <div className="mb-12 md:mb-0 md:ml-16">
-                            <TextArcEffect />
-                        </div>
-
-                        <p className="text-gray-300 text-center md:text-right text-xl md:text-2xl lg:text-4xl leading-relaxed max-w-2xl">
-                            Transforming ideas into cutting-edge digital experiences.
-                            Our solutions blend creativity with technology to build
-                            the future today.
-                        </p>
-                    </div>
-                </div>
-
-                {/* Additional content */}
-                <div className="mt-12 md:mt-16 w-full grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-6xl">
-                    <div className="p-6 rounded-lg bg-gray-900/50 backdrop-blur-sm border border-gray-800 hover:border-green-400/30 transition-all duration-300">
-                        <h3 className="text-green-400 text-lg font-semibold mb-3">Web Development</h3>
-                        <p className="text-gray-400">
-                            Modern, responsive websites built with the latest technologies for optimal performance.
-                        </p>
-                    </div>
-
-                    <div className="p-6 rounded-lg bg-gray-900/50 backdrop-blur-sm border border-gray-800 hover:border-green-400/30 transition-all duration-300">
-                        <h3 className="text-green-400 text-lg font-semibold mb-3">Mobile Applications</h3>
-                        <p className="text-gray-400">
-                            Native and cross-platform apps that deliver seamless experiences across all devices.
-                        </p>
-                    </div>
-
-                    <div className="p-6 rounded-lg bg-gray-900/50 backdrop-blur-sm border border-gray-800 hover:border-green-400/30 transition-all duration-300">
-                        <h3 className="text-green-400 text-lg font-semibold mb-3">Cloud Solutions</h3>
-                        <p className="text-gray-400">
-                            Scalable infrastructure and services to power your business in the cloud era.
-                        </p>
-                    </div>
-                </div>
-
-                {/* Call to action */}
-                {/*<button className="mt-8 md:mt-12 px-6 py-3 md:px-8 md:py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-green-500/25">*/}
-                {/*    Explore Our Work*/}
-                {/*</button>*/}
-            </div>
-
-
         </section>
     );
 }

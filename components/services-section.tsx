@@ -1,10 +1,12 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Smartphone, Globe, Database, Shield, Cloud, Cpu, ArrowRight, CheckCircle } from "lucide-react"
-import { Squares } from "@/components/backgrounds/squares-background"
+import { useRef } from "react"
+import Link from "next/link"
+import { ArrowRight, Check, Cloud, Cpu, Database, Globe, Shield, Smartphone } from "lucide-react"
+import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap"
+import { useSmoothReady } from "@/components/motion/smooth-scroll"
+import { SectionHeading } from "@/components/section-heading"
+import { cn } from "@/lib/utils"
 
 const services = [
   {
@@ -51,122 +53,157 @@ const services = [
   },
 ]
 
+/** Where the first stacked card stops (below the nav), and how far each later card sits beneath it. */
+const STACK_TOP = 128
+const STACK_STEP = 22
+/** How much smaller each card behind the front one ends up, so the finished stack reads as a deck. */
+const STACK_SCALE_STEP = 0.03
+
 export function ServicesSection() {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-  const [isVisible, setIsVisible] = useState(false)
+  const ready = useSmoothReady()
   const sectionRef = useRef<HTMLElement>(null)
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setIsVisible(true)
-          }
-        },
-        { threshold: 0.1 },
-    )
+  // Desktop: each card holds near the top while the next one slides over it.
+  useGSAP(
+      () => {
+        if (!ready) return
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current)
-    }
+        const mm = gsap.matchMedia()
+        mm.add("(min-width: 1024px) and (prefers-reduced-motion: no-preference)", () => {
+          const cards = gsap.utils.toArray<HTMLElement>(".service-card")
+          const last = cards[cards.length - 1]
+          const lastTop = STACK_TOP + (cards.length - 1) * STACK_STEP
 
-    return () => observer.disconnect()
-  }, [])
+          cards.forEach((card, index) => {
+            if (card === last) return
+            ScrollTrigger.create({
+              trigger: card,
+              start: `top ${STACK_TOP + index * STACK_STEP}px`,
+              endTrigger: last,
+              end: `top ${lastTop}px`,
+              pin: true,
+              pinSpacing: false,
+            })
+
+            // Recede while the later cards arrive: shrunk from the top edge, so every card keeps
+            // the same visible step above the next, and smaller the deeper it ends up in the stack.
+            gsap.to(card.querySelector(".service-card-body"), {
+              scale: 1 - (cards.length - 1 - index) * STACK_SCALE_STEP,
+              transformOrigin: "50% 0%",
+              ease: "none",
+              scrollTrigger: {
+                trigger: cards[index + 1],
+                start: "top bottom",
+                endTrigger: last,
+                end: `top ${lastTop}px`,
+                scrub: true,
+              },
+            })
+
+            // Darken as the next card covers this one.
+            gsap.to(card.querySelector(".service-card-shade"), {
+              opacity: 0.55,
+              ease: "none",
+              scrollTrigger: {
+                trigger: cards[index + 1],
+                start: "top bottom",
+                end: `top ${STACK_TOP + (index + 1) * STACK_STEP}px`,
+                scrub: true,
+              },
+            })
+          })
+        })
+
+        return () => mm.revert()
+      },
+      { dependencies: [ready], scope: sectionRef },
+  )
 
   return (
-      <section ref={sectionRef} id="services" className="py-20 bg-black relative overflow-hidden">
-        {/* Squares Background */}
-        <div className="absolute inset-0 z-0 opacity-50">
-          <Squares
-              direction="diagonal"
-              speed={0.4}
-              squareSize={35}
-              borderColor="#4A7C59" // Softer green instead of dark gray
-              hoverFillColor="#3D6B4F" // Green hover effect
-              className="w-full h-full"
+      <section ref={sectionRef} id="services" className="relative py-24 md:py-32">
+        <div className="container relative z-20 mx-auto px-4">
+          <SectionHeading
+              title={
+                <>
+                  Our <span className="text-gradient-green">Services</span>
+                </>
+              }
+              description="We don’t just build software. We build the future of your business."
           />
-        </div>
 
-        {/* Animated gradient elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-10 left-10 w-32 h-32 bg-green-500/5 rounded-full blur-xl animate-pulse" />
-          <div
-              className="absolute bottom-20 right-20 w-40 h-40 bg-green-400/5 rounded-full blur-2xl animate-pulse"
-              style={{ animationDelay: "2s" }}
-          />
-          <div
-              className="absolute top-1/2 left-1/3 w-24 h-24 bg-green-600/5 rounded-full blur-lg animate-pulse"
-              style={{ animationDelay: "4s" }}
-          />
-        </div>
-
-        <div className="container mx-auto px-4 relative z-20">
-          <div className={`text-center mb-16 ${isVisible ? "animate-fade-in-up" : "opacity-0"}`}>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl text-white font-bold mb-6 text-balance">
-              Our <span className="text-green-400">Services</span>
-            </h2>
-            <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto text-pretty">
-              We don’t just build software. We build the future of your business.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 relative z-20">
+          <div className="mx-auto flex max-w-5xl flex-col gap-6 lg:gap-10">
             {services.map((service, index) => {
               const Icon = service.icon
               return (
-                  <Card
-                      key={index}
-                      className={`group modern-card-hover relative overflow-hidden border border-gray-800 bg-gray-900/80 backdrop-blur-sm cursor-pointer ${
-                          isVisible ? "animate-bounce-in" : "opacity-0"
-                      }`}
-                      style={{ animationDelay: `${index * 0.1}s` }}
-                      onMouseEnter={() => setHoveredIndex(index)}
-                      onMouseLeave={() => setHoveredIndex(null)}
-                  >
-                    <div
-                        className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-0 group-hover:opacity-20 transition-all duration-500`}
-                    />
+                  // Pinned wrapper > revealed wrapper > scaled card, so the three motions never fight.
+                  <div key={service.title} className="service-card">
+                    <div data-reveal>
+                    <article className="service-card-body glass-strong relative overflow-hidden rounded-[2rem] lg:min-h-[440px]">
+                      <div
+                          aria-hidden="true"
+                          className={cn(
+                              "pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-gradient-to-br opacity-[0.14] blur-3xl",
+                              service.color,
+                          )}
+                      />
+                      <Icon
+                          aria-hidden="true"
+                          className="pointer-events-none absolute -bottom-16 -left-10 h-72 w-72 text-white/[0.03]"
+                          strokeWidth={1}
+                      />
 
-                    <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 via-transparent to-green-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="relative grid gap-10 p-7 md:p-12 lg:grid-cols-12 lg:gap-12">
+                        <div className="flex flex-col lg:col-span-7">
+                          <div className="flex items-center gap-4 font-mono text-sm">
+                            <span className="text-green-400">{String(index + 1).padStart(2, "0")}</span>
+                            <span className="h-px w-10 bg-white/20" />
+                            <span className="text-gray-400">{String(services.length).padStart(2, "0")}</span>
+                          </div>
 
-                    <CardHeader className="relative z-10">
-                      <div className="w-12 h-12 mb-4 bg-green-500/20 rounded-lg flex items-center justify-center group-hover:bg-green-500/30 group-hover:scale-110 transition-all duration-300">
-                        <Icon className="h-6 w-6 text-green-400 group-hover:text-green-300 transition-colors" />
+                          <div className="mt-8 flex h-14 w-14 items-center justify-center rounded-2xl border border-green-400/30 bg-green-500/10 shadow-[0_0_40px_-12px_rgba(74,222,128,0.5)]">
+                            <Icon className="h-7 w-7 text-green-300" />
+                          </div>
+
+                          <h3 className="mt-6 text-3xl font-semibold tracking-tight text-white md:text-5xl">
+                            {service.title}
+                          </h3>
+                          <p className="mt-4 max-w-md text-lg leading-relaxed text-gray-300">
+                            {service.description}
+                          </p>
+
+                          <Link href="/#contact" className="btn-glass btn-sm group mt-6 self-start lg:mt-6">
+                            Discuss your project
+                            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                          </Link>
+                        </div>
+
+                        <div className="lg:col-span-5 lg:pt-1">
+                          <p className="font-mono text-xs uppercase tracking-[0.2em] text-gray-400">
+                            What&apos;s included
+                          </p>
+                          <ul className="mt-4 border-t border-white/[0.08]">
+                            {service.features.map((feature) => (
+                                <li
+                                    key={feature}
+                                    className="flex items-center gap-4 border-b border-white/[0.08] py-4 text-gray-200"
+                                >
+                                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-green-400/30 bg-green-500/10">
+                                    <Check className="h-3.5 w-3.5 text-green-300" />
+                                  </span>
+                                  {feature}
+                                </li>
+                            ))}
+                          </ul>
+                        </div>
                       </div>
-                      <CardTitle className="text-xl mb-2 text-white group-hover:text-green-400 transition-colors">
-                        {service.title}
-                      </CardTitle>
-                      <CardDescription className="text-gray-400 group-hover:text-gray-300 transition-colors">
-                        {service.description}
-                      </CardDescription>
-                    </CardHeader>
 
-                    <CardContent className="relative z-10">
-                      <ul className="space-y-2 mb-6">
-                        {service.features.map((feature, featureIndex) => (
-                            <li
-                                key={featureIndex}
-                                className="flex items-center text-sm text-gray-400 group-hover:text-gray-300 transition-colors"
-                            >
-                              <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                              {feature}
-                            </li>
-                        ))}
-                      </ul>
-
-                      {/*<Button*/}
-                      {/*    variant="ghost"*/}
-                      {/*    className="w-full modern-button-hover bg-gray-800 text-gray-300 group-hover:bg-green-600 group-hover:text-white transition-all duration-300"*/}
-                      {/*>*/}
-                      {/*  Learn More*/}
-                      {/*  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-2 transition-transform duration-300" />*/}
-                      {/*</Button>*/}
-                    </CardContent>
-
-                    {hoveredIndex === index && (
-                        <div className="absolute inset-0 border-2 border-green-500/60 rounded-lg animate-glow-pulse" />
-                    )}
-                  </Card>
+                      <div
+                          aria-hidden="true"
+                          className="service-card-shade pointer-events-none absolute inset-0 rounded-[2rem] bg-black opacity-0"
+                      />
+                    </article>
+                    </div>
+                  </div>
               )
             })}
           </div>

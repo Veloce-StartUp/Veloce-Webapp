@@ -105,21 +105,17 @@ export function ScheduleMeetingModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          className="modern-button-hover border-green-500 text-green-400 hover:bg-green-600 hover:text-white bg-transparent hover:scale-105 transition-all duration-300"
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
+        <button type="button" className="btn-glass btn-sm">
+          <CalendarIcon className="h-4 w-4" />
           Schedule Call
-        </Button>
+        </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] bg-gray-900 border-gray-800 text-white max-h-[90vh] overflow-y-auto">
+      <DialogContent className="glass-strong rounded-3xl border-white/10 bg-black/70 sm:max-w-[500px] text-white max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-white">
             Schedule a Meeting
           </DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogDescription className="text-gray-300">
             Choose a suitable time for us to discuss your project.
           </DialogDescription>
         </DialogHeader>
@@ -139,11 +135,11 @@ export function ScheduleMeetingModal() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-300">Name</FormLabel>
+                    <FormLabel className="text-gray-200">Name</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Your Name"
-                        className="bg-gray-800 border-gray-700 text-white focus:ring-green-500/50"
+                        className="bg-white/[0.05] border-white/10 text-white focus:ring-green-500/50"
                         {...field}
                       />
                     </FormControl>
@@ -156,12 +152,12 @@ export function ScheduleMeetingModal() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-300">Email</FormLabel>
+                    <FormLabel className="text-gray-200">Email</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
                         placeholder="your@email.com"
-                        className="bg-gray-800 border-gray-700 text-white focus:ring-green-500/50"
+                        className="bg-white/[0.05] border-white/10 text-white focus:ring-green-500/50"
                         {...field}
                       />
                     </FormControl>
@@ -179,14 +175,14 @@ export function ScheduleMeetingModal() {
                 name="date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel className="text-gray-300">Date</FormLabel>
+                    <FormLabel className="text-gray-200">Date</FormLabel>
                     <Button
                       type="button"
                       variant="outline"
                       onClick={() => setShowCalendar(!showCalendar)}
                       className={cn(
-                        "w-full pl-3 text-left font-normal bg-gray-800 border-gray-700 hover:bg-gray-700 hover:text-white",
-                        field.value ? "text-white" : "text-gray-500",
+                        "w-full pl-3 text-left font-normal bg-white/[0.05] border-white/10 hover:bg-white/[0.08] hover:text-white",
+                        field.value ? "text-white" : "text-gray-400",
                       )}
                     >
                       {field.value ? (
@@ -207,15 +203,15 @@ export function ScheduleMeetingModal() {
                 name="time"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-300">Time</FormLabel>
+                    <FormLabel className="text-gray-200">Time</FormLabel>
                     <FormControl>
                       <select
                         value={field.value || ""}
                         onChange={(e) => field.onChange(e.target.value)}
                         disabled={!selectedDate}
-                        className="flex h-9 w-full rounded-md border bg-gray-800 border-gray-700 text-white px-3 py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-green-500/50 appearance-none"
+                        className="flex h-9 w-full rounded-md border bg-white/[0.05] border-white/10 text-white px-3 py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-green-500/50 appearance-none"
                       >
-                        <option value="" disabled className="text-gray-500">
+                        <option value="" disabled className="text-gray-400">
                           {selectedDate ? "Select time" : "Pick date first"}
                         </option>
                         {TIME_SLOTS.map((slot) => (
@@ -263,23 +259,23 @@ export function ScheduleMeetingModal() {
                         caption_label: "text-sm font-semibold text-white",
                         nav: "flex items-center justify-between absolute inset-x-0 top-0 px-1",
                         button_previous:
-                          "h-7 w-7 inline-flex items-center justify-center rounded-md text-gray-400 hover:text-white hover:bg-gray-700 transition-colors",
+                          "h-7 w-7 inline-flex items-center justify-center rounded-md text-gray-300 hover:text-white hover:bg-gray-700 transition-colors",
                         button_next:
-                          "h-7 w-7 inline-flex items-center justify-center rounded-md text-gray-400 hover:text-white hover:bg-gray-700 transition-colors",
+                          "h-7 w-7 inline-flex items-center justify-center rounded-md text-gray-300 hover:text-white hover:bg-gray-700 transition-colors",
                         month_grid: "w-full border-collapse",
                         weekdays: "flex",
                         weekday:
-                          "text-gray-500 w-9 h-8 flex items-center justify-center text-xs font-medium uppercase",
+                          "text-gray-400 w-9 h-8 flex items-center justify-center text-xs font-medium uppercase",
                         week: "flex w-full mt-1",
                         day: "relative p-0 text-center flex-1 flex items-center justify-center",
                         day_button:
-                          "h-9 w-9 rounded-lg text-sm font-medium text-gray-300 hover:bg-green-600/30 hover:text-white transition-all duration-150 cursor-pointer flex items-center justify-center",
+                          "h-9 w-9 rounded-lg text-sm font-medium text-gray-200 hover:bg-green-600/30 hover:text-white transition-all duration-150 cursor-pointer flex items-center justify-center",
                         selected:
                           "[&>button]:bg-green-600 [&>button]:text-white [&>button]:hover:bg-green-500 [&>button]:shadow-lg [&>button]:shadow-green-600/30",
                         today:
                           "[&>button]:border [&>button]:border-green-500/50 [&>button]:text-green-400",
                         outside:
-                          "[&>button]:text-gray-600 [&>button]:hover:text-gray-400",
+                          "[&>button]:text-gray-500 [&>button]:hover:text-gray-300",
                         disabled:
                           "[&>button]:text-gray-700 [&>button]:hover:bg-transparent [&>button]:cursor-not-allowed [&>button]:opacity-40",
                       }}
@@ -295,13 +291,13 @@ export function ScheduleMeetingModal() {
               name="topic"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-gray-300">
+                  <FormLabel className="text-gray-200">
                     Topic (Optional)
                   </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Project discussion"
-                      className="bg-gray-800 border-gray-700 text-white focus:ring-green-500/50"
+                      className="bg-white/[0.05] border-white/10 text-white focus:ring-green-500/50"
                       {...field}
                     />
                   </FormControl>
