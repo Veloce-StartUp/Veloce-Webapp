@@ -6,6 +6,7 @@ import { useRef, useEffect } from 'react';
 type WWavePathProps = React.ComponentProps<'div'>;
 
 export function WavePath({ className, ...props }: WWavePathProps) {
+	const container = useRef<HTMLDivElement>(null);
 	const path = useRef<SVGPathElement>(null);
 	let progress = 0;
 	let x = 0.2;
@@ -13,11 +14,15 @@ export function WavePath({ className, ...props }: WWavePathProps) {
 	let reqId: number | null = null;
 
 	useEffect(() => {
-		setPath(progress);
+		const redraw = () => setPath(progress);
+		redraw();
+		window.addEventListener('resize', redraw);
+		return () => window.removeEventListener('resize', redraw);
 	}, []);
 
 	const setPath = (progress: number) => {
-		const width = window.innerWidth * 0.7;
+		// The curve spans the full width of the line's own container.
+		const width = container.current?.offsetWidth ?? 0;
 		if (path.current) {
 			path.current.setAttributeNS(
 				null,
@@ -68,7 +73,7 @@ export function WavePath({ className, ...props }: WWavePathProps) {
 	};
 
 	return (
-		<div className={cn('relative h-px w-full md:w-[70vw]', className)} {...props}>
+		<div ref={container} className={cn('relative h-px w-full', className)} {...props}>
 			<div
 				onMouseEnter={manageMouseEnter}
 				onMouseMove={manageMouseMove}

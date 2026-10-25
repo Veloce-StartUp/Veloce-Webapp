@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
-import { InteractiveBackground } from "@/components/interactive-background";
-import { ScrollToTop } from "@/components/scroll-to-top";
 import { ProjectDetail } from "@/components/project-detail";
 import { getProjectBySlug, projects } from "@/lib/projects";
 
@@ -49,12 +46,9 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-black relative overflow-hidden">
-      <InteractiveBackground />
-      <Navigation />
+    <main className="relative min-h-screen overflow-hidden">
       <ProjectDetail slug={project.slug} />
       <Footer />
-      <ScrollToTop />
     </main>
   );
 }

@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { FileText, Users, Code, TestTube, Rocket, CheckCircle2, ArrowRight } from "lucide-react"
-import { motion } from "framer-motion"
+import { useRef } from "react"
+import { ArrowRight, CheckCircle2, Code, FileText, Rocket, TestTube, Users } from "lucide-react"
+import { gsap, useGSAP } from "@/lib/gsap"
+import { useSmoothReady } from "@/components/motion/smooth-scroll"
+import { SectionHeading } from "@/components/section-heading"
+import { cn } from "@/lib/utils"
 
 const developmentStages = [
   {
@@ -70,164 +71,147 @@ const developmentStages = [
 ]
 
 export function TimelineSection() {
-  const [visibleItems, setVisibleItems] = useState<number[]>([])
-  const [isVisible, setIsVisible] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-  const itemRefs = useRef<(HTMLDivElement | null)[]>([])
+  const ready = useSmoothReady()
   const sectionRef = useRef<HTMLElement>(null)
+  const pinRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const progressRef = useRef<HTMLSpanElement>(null)
 
-  useEffect(() => {
-    // Check if mobile
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024)
-    }
+  // Desktop: pin the section and scroll the stages sideways.
+  useGSAP(
+      () => {
+        if (!ready) return
 
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
+        const mm = gsap.matchMedia()
+        mm.add("(min-width: 1024px) and (prefers-reduced-motion: no-preference)", () => {
+          const track = trackRef.current!
+          const distance = () => Math.max(0, track.scrollWidth - window.innerWidth)
 
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            const index = Number.parseInt(entry.target.getAttribute("data-index") || "0")
-            if (entry.isIntersecting) {
-              setTimeout(() => {
-                setVisibleItems((prev) => [...prev, index])
-              }, index * 200)
-            }
+          const slide = gsap.to(track, {
+            x: () => -distance(),
+            ease: "none",
+            scrollTrigger: {
+              trigger: pinRef.current,
+              start: "top top",
+              end: () => `+=${distance()}`,
+              pin: true,
+              scrub: 1,
+              invalidateOnRefresh: true,
+              anticipatePin: 1,
+              refreshPriority: 1,
+              onUpdate: (self) => {
+                progressRef.current?.style.setProperty("transform", `scaleX(${self.progress})`)
+              },
+            },
           })
-        },
-        { threshold: 0.3 },
-    )
 
-    itemRefs.current.forEach((ref) => {
-      if (ref) observer.observe(ref)
-    })
+          gsap.utils.toArray<HTMLElement>(".process-card").forEach((card) => {
+            gsap.fromTo(
+                card,
+                { opacity: 0.35, scale: 0.94 },
+                {
+                  opacity: 1,
+                  scale: 1,
+                  ease: "none",
+                  scrollTrigger: {
+                    trigger: card,
+                    containerAnimation: slide,
+                    start: "left 92%",
+                    end: "left 55%",
+                    scrub: true,
+                  },
+                },
+            )
+          })
+        })
 
-    return () => observer.disconnect()
-  }, [])
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setIsVisible(true)
-          }
-        },
-        { threshold: 0.1 },
-    )
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current)
-    }
-
-    return () => observer.disconnect()
-  }, [])
+        return () => mm.revert()
+      },
+      { dependencies: [ready], scope: sectionRef },
+  )
 
   return (
-      <section ref={sectionRef} id="timeline" className="py-20 bg-black relative overflow-hidden">
-        <div className="container mx-auto px-4 relative z-20">
-          <div className={`text-center mb-16 ${isVisible ? "animate-fade-in-up" : "opacity-0"}`}>
-            <motion.h2
-                initial={{ opacity: 0, y: 20 }}
-                animate={isVisible ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6 }}
-                className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-balance text-white"
-            >
-              Our Development <span className="text-green-400">Process</span>
-            </motion.h2>
-            <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={isVisible ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto text-pretty"
-            >
-              From initial concept to final deployment - here's how we transform your ideas into reality.
-            </motion.p>
+      <section ref={sectionRef} id="timeline" className="relative">
+        <div
+            ref={pinRef}
+            className="relative flex flex-col justify-center overflow-hidden py-24 md:py-32 lg:h-screen lg:min-h-[720px] lg:pb-6 lg:pt-24"
+        >
+          <div className="container relative z-20 mx-auto px-4">
+            <SectionHeading
+                align="left"
+                className="mb-12 md:mb-12 lg:mb-14"
+                title={
+                  <>
+                    Our Development <span className="text-gradient-green">Process</span>
+                  </>
+                }
+                description="From initial concept to final deployment - here's how we transform your ideas into reality."
+            />
           </div>
 
-          <div className="relative max-w-6xl mx-auto">
-            {/* Vertical timeline line - hidden on mobile */}
-            {!isMobile && (
-                <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-green-400 via-green-500 to-green-600 transform -translate-x-0.5" />
-            )}
+          <div
+              ref={trackRef}
+              className="relative z-20 flex flex-col gap-5 px-4 lg:w-max lg:flex-row lg:gap-6 lg:pl-[max(1rem,calc(50vw-624px))] lg:pr-[12vw]"
+          >
+            {developmentStages.map((stage) => {
+              const Icon = stage.icon
+              return (
+                  <div key={stage.stage} data-reveal className="lg:w-[400px] lg:shrink-0">
+                    <article className="process-card glass spotlight group relative flex h-full flex-col overflow-hidden rounded-[1.75rem] p-7 lg:min-h-[400px]">
+                      <span
+                          aria-hidden="true"
+                          className="pointer-events-none absolute -right-2 -top-6 select-none text-[8rem] font-semibold leading-none text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.08)] transition-all duration-500 group-hover:[-webkit-text-stroke:1px_rgba(74,222,128,0.35)]"
+                      >
+                        {stage.stage}
+                      </span>
 
-            <div className="space-y-8 lg:space-y-12">
-              {developmentStages.map((stage, index) => {
-                const Icon = stage.icon
-                const isVisible = visibleItems.includes(index)
-                const isLeft = index % 2 === 0
-
-                return (
-                    <div
-                        key={index}
-                        ref={(el) => {
-                          itemRefs.current[index] = el;
-                        }}
-                        data-index={index}
-                        className={`relative flex flex-col lg:flex-row items-center ${
-                            isLeft ? "lg:flex-row" : "lg:flex-row-reverse"
-                        } ${isVisible ? (isLeft && !isMobile ? "animate-fade-in-left" : "animate-fade-in-right") : "opacity-0"}`}
-                    >
-                      {/* Timeline dot - hidden on mobile */}
-                      {!isMobile && (
-                          <div className="hidden lg:block absolute left-1/2 w-6 h-6 bg-green-500 rounded-full border-4 border-black transform -translate-x-1/2 z-10 animate-glow-pulse">
-                            <div className="absolute inset-0 bg-green-400 rounded-full animate-ping opacity-75" />
-                          </div>
-                      )}
-
-                      {/* Mobile timeline dot */}
-                      {isMobile && (
-                          <div className="lg:hidden absolute left-6 top-6 w-4 h-4 bg-green-500 rounded-full border-2 border-black z-10 animate-glow-pulse">
-                            <div className="absolute inset-0 bg-green-400 rounded-full animate-ping opacity-75" />
-                          </div>
-                      )}
-
-                      {/* Content card */}
-                      <div className={`w-full ${isMobile ? 'pl-14' : 'lg:w-5/12'} ${isLeft && !isMobile ? "lg:mr-auto lg:pr-8" : !isMobile ? "lg:ml-auto lg:pl-8" : ""}`}>
-                        <Card className="group modern-card-hover bg-gray-900/80 backdrop-blur-sm border-gray-800 hover:border-green-500/50 transition-all duration-300">
-                          <CardContent className="p-6">
-                            <div className="flex items-start mb-4">
-                              <div className="w-14 h-14 bg-green-500/20 rounded-lg flex items-center justify-center mr-4 group-hover:bg-green-500/30 group-hover:scale-110 transition-all duration-300 flex-shrink-0">
-                                <Icon className="h-7 w-7 text-green-400 group-hover:text-green-300 transition-colors" />
-                              </div>
-                              <div className="flex-grow">
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
-                                  <Badge className="bg-green-600 hover:bg-green-700 text-white mb-2 sm:mb-0 w-fit">
-                                    Stage {stage.stage}
-                                  </Badge>
-                                  {/*<span className="text-sm text-green-400 font-medium">{stage.duration}</span>*/}
-                                </div>
-                                <h3 className="text-xl font-semibold text-white group-hover:text-green-400 transition-colors mb-2">
-                                  {stage.title}
-                                </h3>
-                              </div>
-                            </div>
-
-                            <p className="text-gray-400 mb-4 group-hover:text-gray-300 transition-colors">
-                              {stage.description}
-                            </p>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              {stage.details.map((detail, detailIndex) => (
-                                  <div
-                                      key={detailIndex}
-                                      className="text-sm text-gray-400 flex items-center group-hover:text-gray-300 transition-colors"
-                                  >
-                                    <ArrowRight className="w-3 h-3 text-green-400 mr-2 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
-                                    {detail}
-                                  </div>
-                              ))}
-                            </div>
-                          </CardContent>
-                        </Card>
+                      <div className="mb-6 flex items-center gap-3">
+                        <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-green-400/25 bg-green-500/10 transition-all duration-500 group-hover:scale-110 group-hover:shadow-[0_0_30px_-4px_rgba(74,222,128,0.6)]">
+                          <Icon className="h-6 w-6 text-green-400" />
+                        </span>
+                        <span
+                            className={cn(
+                                "rounded-full border px-3 py-1 text-xs",
+                                stage.status === "ongoing"
+                                    ? "border-green-400/40 bg-green-500/15 text-green-300"
+                                    : "border-white/10 bg-white/[0.04] text-gray-200",
+                            )}
+                        >
+                          {stage.status === "ongoing" ? "Ongoing" : `Stage ${stage.stage}`}
+                        </span>
                       </div>
-                    </div>
-                )
-              })}
+
+                      <h3 className="text-2xl font-semibold text-white transition-colors group-hover:text-green-300">
+                        {stage.title}
+                      </h3>
+                      <p className="mt-3 text-gray-300">{stage.description}</p>
+
+                      <ul className="mt-auto grid gap-2 pt-6">
+                        {stage.details.map((detail) => (
+                            <li key={detail} className="flex items-center text-sm text-gray-300">
+                              <ArrowRight className="mr-2 h-3 w-3 flex-shrink-0 text-green-400 transition-transform group-hover:translate-x-1" />
+                              {detail}
+                            </li>
+                        ))}
+                      </ul>
+                    </article>
+                  </div>
+              )
+            })}
+          </div>
+
+          {/* Stage progress for the sideways scroll (desktop) */}
+          <div className="container relative z-20 mx-auto mt-10 hidden px-4 lg:block">
+            <div className="flex max-w-md items-center gap-4 text-xs uppercase tracking-[0.2em] text-gray-400">
+              <span>Stage 01</span>
+              <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
+                <span
+                    ref={progressRef}
+                    className="block h-full origin-left rounded-full bg-gradient-to-r from-green-500 to-green-300 shadow-[0_0_12px_rgba(74,222,128,0.8)]"
+                    style={{ transform: "scaleX(0)" }}
+                />
+              </div>
+              <span>Stage 06</span>
             </div>
           </div>
         </div>

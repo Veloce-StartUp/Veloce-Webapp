@@ -38,6 +38,19 @@ interface SplashCursorProps {
   DISABLE_ON_INTERACTIVE?: boolean;
 }
 
+/** Elements (and their contents) over which the splash fades out, so their hover effects stay visible.
+ *  `data-splash-quiet` marks a whole group of controls, so the gaps between them count too. */
+const INTERACTIVE_SELECTOR =
+  'a, button, input, select, textarea, [role="button"], [onclick], .cursor-pointer, [data-splash-quiet]';
+
+const DEFAULT_BACK_COLOR: BackColor = { r: 0, g: 0, b: 0 };
+
+/** Blended draws of the fluid per frame; more passes give a denser, brighter splash. */
+const DISPLAY_PASSES = 4;
+
+/** By this long after the last pointer input the splash has faded out, so the loop can rest. */
+const IDLE_STOP_MS = 4000;
+
 interface WebGLExtensions {
   formatRGBA: { internalFormat: number; format: number };
   formatRG: { internalFormat: number; format: number };
@@ -95,42 +108,35 @@ function SplashCursor({
   SPLAT_FORCE = 3000,
   SHADING = true,
   COLOR_UPDATE_SPEED = 5,
-  BACK_COLOR = { r: 0, g: 0, b: 0 },
+  BACK_COLOR = DEFAULT_BACK_COLOR,
   TRANSPARENT = true,
   DISABLE_ON_INTERACTIVE = true,
 }: SplashCursorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isInteractiveHover, setIsInteractiveHover] = useState(false);
+  // A cursor effect: skipped on touch-only devices and for people who prefer reduced motion.
+  const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
-    const isInteractiveElement = (element: EventTarget | null): boolean => {
-      if (!element || !(element instanceof Element)) return false;
+    setEnabled(
+      window.matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)").matches,
+    );
+  }, []);
 
-      const tagName = element.tagName.toLowerCase();
-      const role = element.getAttribute("role");
-      const isClickable =
-        tagName === "button" ||
-        tagName === "a" ||
-        tagName === "input" ||
-        tagName === "select" ||
-        tagName === "textarea" ||
-        role === "button" ||
-        element.hasAttribute("onclick") ||
-        element.classList.contains("cursor-pointer");
-
-      return isClickable;
-    };
+  useEffect(() => {
+    // Matches the control itself or anything inside it (an icon, a label span), so the
+    // splash stays hidden over the whole button rather than flickering back over its icon.
+    const isInteractiveElement = (element: EventTarget | null): boolean =>
+      element instanceof Element &&
+      element.closest(INTERACTIVE_SELECTOR) !== null;
 
     const handleMouseOver = (e: MouseEvent) => {
-      if (isInteractiveElement(e.target)) {
-        setIsInteractiveHover(true);
-      }
+      setIsInteractiveHover(isInteractiveElement(e.target));
     };
 
     const handleMouseOut = (e: MouseEvent) => {
-      if (isInteractiveElement(e.target)) {
-        setIsInteractiveHover(false);
-      }
+      // Leaving the window entirely.
+      if (!e.relatedTarget) setIsInteractiveHover(false);
     };
 
     if (DISABLE_ON_INTERACTIVE) {
@@ -145,10 +151,8 @@ function SplashCursor({
   }, [DISABLE_ON_INTERACTIVE]);
 
   useEffect(() => {
-    if (isInteractiveHover) return;
-
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!enabled || !canvas) return;
 
     const hashCode = (s: string): number => {
       if (s.length === 0) return 0;
@@ -1093,17 +1097,35 @@ function SplashCursor({
     initFramebuffers();
     let lastUpdateTime = Date.now();
     let colorUpdateTimer = 0.0;
+    let frameId = 0;
+    let lastInputTime = Date.now();
+    let running = false;
 
     const updateFrame = () => {
-      if (isInteractiveHover) return;
-
       const dt = calcDeltaTime();
       if (resizeCanvas()) initFramebuffers();
       updateColors(dt);
       applyInputs();
       step(dt);
-      render(null);
-      requestAnimationFrame(updateFrame);
+      // The original effect (before its loops were cleaned up) ended up with two simulations
+      // each drawn twice per frame. Those blended passes are what gave the splash its body, so
+      // keep drawing the same number of layers from the one simulation.
+      for (let pass = 0; pass < DISPLAY_PASSES; pass++) render(null);
+
+      // Nothing left on screen to animate: rest until the next pointer input.
+      if (Date.now() - lastInputTime > IDLE_STOP_MS) {
+        running = false;
+        return;
+      }
+      frameId = requestAnimationFrame(updateFrame);
+    };
+
+    const wake = () => {
+      lastInputTime = Date.now();
+      if (running) return;
+      running = true;
+      lastUpdateTime = Date.now();
+      frameId = requestAnimationFrame(updateFrame);
     };
 
     const calcDeltaTime = (): number => {
@@ -1546,51 +1568,27 @@ function SplashCursor({
       return Math.floor(input * pixelRatio);
     };
 
-    window.addEventListener("mousedown", (e) => {
+    const handleMouseDown = (e: MouseEvent) => {
       let pointer = pointers[0];
       let posX = scaleByPixelRatio(e.clientX);
       let posY = scaleByPixelRatio(e.clientY);
       updatePointerDownData(pointer, -1, posX, posY);
       clickSplat(pointer);
-    });
+      wake();
+    };
 
-    document.body.addEventListener(
-      "mousemove",
-      function handleFirstMouseMove(e) {
-        let pointer = pointers[0];
-        let posX = scaleByPixelRatio(e.clientX);
-        let posY = scaleByPixelRatio(e.clientY);
-        let color = generateColor();
-        updateFrame(); // start animation loop
-        updatePointerMoveData(pointer, posX, posY, color);
-        document.body.removeEventListener("mousemove", handleFirstMouseMove);
-      },
-    );
-
-    window.addEventListener("mousemove", (e) => {
+    let hasMoved = false;
+    const handleMouseMove = (e: MouseEvent) => {
       let pointer = pointers[0];
       let posX = scaleByPixelRatio(e.clientX);
       let posY = scaleByPixelRatio(e.clientY);
-      let color = pointer.color;
+      let color = hasMoved ? pointer.color : generateColor();
+      hasMoved = true;
       updatePointerMoveData(pointer, posX, posY, color);
-    });
+      wake();
+    };
 
-    document.body.addEventListener(
-      "touchstart",
-      function handleFirstTouchStart(e) {
-        const touches = e.targetTouches;
-        let pointer = pointers[0];
-        for (let i = 0; i < touches.length; i++) {
-          let posX = scaleByPixelRatio(touches[i].clientX);
-          let posY = scaleByPixelRatio(touches[i].clientY);
-          updateFrame(); // start animation loop
-          updatePointerDownData(pointer, touches[i].identifier, posX, posY);
-        }
-        document.body.removeEventListener("touchstart", handleFirstTouchStart);
-      },
-    );
-
-    window.addEventListener("touchstart", (e) => {
+    const handleTouchStart = (e: TouchEvent) => {
       const touches = e.targetTouches;
       let pointer = pointers[0];
       for (let i = 0; i < touches.length; i++) {
@@ -1598,34 +1596,43 @@ function SplashCursor({
         let posY = scaleByPixelRatio(touches[i].clientY);
         updatePointerDownData(pointer, touches[i].identifier, posX, posY);
       }
-    });
+      wake();
+    };
 
-    window.addEventListener(
-      "touchmove",
-      (e) => {
-        const touches = e.targetTouches;
-        let pointer = pointers[0];
-        for (let i = 0; i < touches.length; i++) {
-          let posX = scaleByPixelRatio(touches[i].clientX);
-          let posY = scaleByPixelRatio(touches[i].clientY);
-          updatePointerMoveData(pointer, posX, posY, pointer.color);
-        }
-      },
-      false,
-    );
+    const handleTouchMove = (e: TouchEvent) => {
+      const touches = e.targetTouches;
+      let pointer = pointers[0];
+      for (let i = 0; i < touches.length; i++) {
+        let posX = scaleByPixelRatio(touches[i].clientX);
+        let posY = scaleByPixelRatio(touches[i].clientY);
+        updatePointerMoveData(pointer, posX, posY, pointer.color);
+      }
+      wake();
+    };
 
-    window.addEventListener("touchend", (e) => {
+    const handleTouchEnd = (e: TouchEvent) => {
       const touches = e.changedTouches;
       let pointer = pointers[0];
       for (let i = 0; i < touches.length; i++) {
         updatePointerUpData(pointer);
       }
-    });
+    };
 
-    updateFrame();
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("touchstart", handleTouchStart);
+    window.addEventListener("touchmove", handleTouchMove, false);
+    window.addEventListener("touchend", handleTouchEnd);
+
+    wake();
 
     return () => {
-      // Cleanup if needed
+      cancelAnimationFrame(frameId);
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
     };
   }, [
     SIM_RESOLUTION,
@@ -1642,8 +1649,10 @@ function SplashCursor({
     COLOR_UPDATE_SPEED,
     BACK_COLOR,
     TRANSPARENT,
-    isInteractiveHover,
+    enabled,
   ]);
+
+  if (!enabled) return null;
 
   return (
     <div

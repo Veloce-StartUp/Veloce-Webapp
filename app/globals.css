@@ -440,39 +440,6 @@
   left: 100%;
 }
 
-/* Scroll to top button styles */
-.scroll-to-top {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  z-index: 50;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  background: rgba(34, 197, 94, 0.9);
-  color: white;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3);
-}
-
-.scroll-to-top:hover {
-  background: rgba(34, 197, 94, 1);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(34, 197, 94, 0.4);
-}
-
-.scroll-to-top.hidden {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(20px);
-}
-
 /* Make interactive elements have normal cursor */
 button, a, input, select, textarea,
 [role="button"], [onclick], .cursor-pointer {
@@ -530,4 +497,438 @@ button, a, input, select, textarea,
 }
 .font-pixelated {
   font-family: var(--font-vt323), monospace;
+}
+
+/* ==========================================================================
+   Glassmorphism design system
+   ========================================================================== */
+
+html {
+  scrollbar-color: rgb(34 197 94 / 0.45) transparent;
+  scrollbar-width: thin;
+}
+
+::selection {
+  background: rgb(34 197 94 / 0.35);
+  color: #fff;
+}
+
+/* Sits above the fluid cursor canvas (z-10) so glass panels blur it */
+#smooth-wrapper {
+  position: relative;
+  z-index: 20;
+}
+
+@layer components {
+  .glass {
+    background-color: rgb(255 255 255 / 0.035);
+    background-image: linear-gradient(
+      140deg,
+      rgb(255 255 255 / 0.09) 0%,
+      rgb(255 255 255 / 0.015) 45%,
+      rgb(255 255 255 / 0.03) 100%
+    );
+    border: 1px solid rgb(255 255 255 / 0.08);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.07),
+      0 30px 60px -30px rgb(0 0 0 / 0.8);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
+  }
+
+  .glass-strong {
+    background-color: rgb(6 10 8 / 0.6);
+    background-image: linear-gradient(140deg, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.02) 50%);
+    border: 1px solid rgb(255 255 255 / 0.1);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.08),
+      0 30px 80px -30px rgb(0 0 0 / 0.9);
+    -webkit-backdrop-filter: blur(28px) saturate(170%);
+    backdrop-filter: blur(28px) saturate(170%);
+  }
+
+  .glass-green {
+    background-color: rgb(34 197 94 / 0.05);
+    background-image: linear-gradient(140deg, rgb(134 239 172 / 0.08), rgb(34 197 94 / 0.02) 55%);
+    border: 1px solid rgb(74 222 128 / 0.22);
+    box-shadow:
+      inset 0 1px 0 0 rgb(187 247 208 / 0.12),
+      0 20px 50px -24px rgb(34 197 94 / 0.25);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    backdrop-filter: blur(20px) saturate(170%);
+  }
+
+  /* Cursor-following glow + border light; --mx/--my are set by the SmoothScroll provider */
+  .spotlight {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .spotlight::before,
+  .spotlight::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .spotlight::before {
+    z-index: -1;
+    background: radial-gradient(
+      520px circle at var(--mx, 50%) var(--my, 50%),
+      rgb(74 222 128 / 0.13),
+      transparent 42%
+    );
+  }
+
+  .spotlight::after {
+    padding: 1px;
+    background: radial-gradient(
+      360px circle at var(--mx, 50%) var(--my, 50%),
+      rgb(134 239 172 / 0.7),
+      transparent 45%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+  }
+
+  .spotlight:hover::before,
+  .spotlight:hover::after {
+    opacity: 1;
+  }
+
+  /* Highlighted words: green serif italic, set against the sans headlines */
+  .text-gradient-green {
+    background-image: linear-gradient(120deg, #bbf7d0 0%, #4ade80 38%, #10b981 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-family: var(--font-instrument-serif), Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    /* Room for the italic overhang, which background-clip would otherwise cut off */
+    padding-right: 0.08em;
+  }
+
+  /* Buttons stay where they are on hover: light and colour do the work, plus a slight press on click */
+  .btn-primary,
+  .btn-glass {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 3rem;
+    padding: 0 1.5rem;
+    border-radius: 9999px;
+    font-weight: 500;
+    white-space: nowrap;
+    color: #fff;
+    transition:
+      box-shadow 0.4s ease,
+      background-color 0.4s ease,
+      border-color 0.4s ease,
+      color 0.4s ease,
+      transform 0.15s ease;
+  }
+
+  .btn-primary::before,
+  .btn-glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* A band of light sweeps across */
+  .btn-primary::before {
+    background: linear-gradient(
+      110deg,
+      transparent 20%,
+      rgb(255 255 255 / 0.32) 45%,
+      rgb(255 255 255 / 0.08) 58%,
+      transparent 75%
+    );
+    transform: translateX(-110%);
+  }
+
+  .btn-primary:hover::before {
+    transform: translateX(110%);
+  }
+
+  /* A soft green fill rises from the bottom */
+  .btn-glass::before {
+    background: linear-gradient(to top, rgb(34 197 94 / 0.2), rgb(34 197 94 / 0.05));
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+
+  .btn-glass:hover::before {
+    transform: scaleY(1);
+  }
+
+  .btn-primary:active,
+  .btn-glass:active {
+    transform: scale(0.97);
+  }
+
+  .btn-primary {
+    background-image: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.25),
+      0 0 0 1px rgb(74 222 128 / 0.5),
+      0 12px 32px -12px rgb(34 197 94 / 0.9);
+  }
+
+  .btn-primary:hover {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.3),
+      0 0 0 1px rgb(134 239 172 / 0.8),
+      0 16px 44px -10px rgb(34 197 94 / 1);
+  }
+
+  .btn-glass {
+    background-color: rgb(255 255 255 / 0.04);
+    border: 1px solid rgb(255 255 255 / 0.12);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+
+  .btn-glass:hover {
+    border-color: rgb(74 222 128 / 0.55);
+    color: #bbf7d0;
+    box-shadow: 0 0 0 1px rgb(74 222 128 / 0.15), 0 12px 30px -14px rgb(34 197 94 / 0.6);
+  }
+
+  .btn-primary:focus-visible,
+  .btn-glass:focus-visible {
+    outline: 2px solid #4ade80;
+    outline-offset: 3px;
+  }
+
+  .btn-sm {
+    height: 2.5rem;
+    padding: 0 1.1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* 3D tilt (vars set on pointer move). Only while hovered, so resting cards keep a flat
+   transform and Safari keeps rendering their backdrop blur. */
+[data-tilt]:not([data-reveal]),
+[data-tilt].is-revealed {
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  [data-tilt]:hover {
+    transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  }
+}
+
+/* Scroll reveal start states (animated by the SmoothScroll provider) */
+[data-reveal]:not(.is-revealed) {
+  opacity: 0;
+}
+
+[data-split]:not(.is-split) {
+  visibility: hidden;
+}
+
+.hero-root:not(.is-ready) [data-hero] {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary::before,
+  .btn-glass::before,
+  .border-beam,
+  .caret {
+    transition: none;
+    animation: none;
+  }
+
+  [data-reveal],
+  .hero-root [data-hero] {
+    opacity: 1 !important;
+  }
+
+  [data-split] {
+    visibility: visible !important;
+  }
+}
+
+/* Ambient background */
+.ambient-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.035) 1px, transparent 1px);
+  background-size: 72px 72px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 55% at 50% 0%, #000 25%, transparent 75%);
+  mask-image: radial-gradient(ellipse 80% 55% at 50% 0%, #000 25%, transparent 75%);
+}
+
+.ambient-orb {
+  position: absolute;
+  border-radius: 9999px;
+  will-change: transform;
+}
+
+.ambient-orb-a {
+  width: 60vmax;
+  height: 60vmax;
+  left: -18vmax;
+  top: -22vmax;
+  background: radial-gradient(circle, rgb(34 197 94 / 0.1) 0%, rgb(34 197 94 / 0.03) 40%, transparent 68%);
+  animation: orb-drift-a 26s ease-in-out infinite alternate;
+}
+
+.ambient-orb-b {
+  width: 52vmax;
+  height: 52vmax;
+  right: -20vmax;
+  top: 18vh;
+  background: radial-gradient(circle, rgb(16 185 129 / 0.07) 0%, rgb(20 184 166 / 0.02) 42%, transparent 68%);
+  animation: orb-drift-b 32s ease-in-out infinite alternate;
+}
+
+.ambient-orb-c {
+  width: 56vmax;
+  height: 56vmax;
+  left: 15vw;
+  bottom: -38vmax;
+  background: radial-gradient(circle, rgb(22 163 74 / 0.08) 0%, rgb(22 163 74 / 0.02) 42%, transparent 68%);
+  animation: orb-drift-c 30s ease-in-out infinite alternate;
+}
+
+@keyframes orb-drift-a {
+  to {
+    transform: translate3d(12vw, 10vh, 0) scale(1.15);
+  }
+}
+
+@keyframes orb-drift-b {
+  to {
+    transform: translate3d(-14vw, -8vh, 0) scale(0.9);
+  }
+}
+
+@keyframes orb-drift-c {
+  to {
+    transform: translate3d(-10vw, -12vh, 0) scale(1.1);
+  }
+}
+
+.ambient-noise {
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 1.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+@keyframes scroll-cue {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  80%,
+  100% {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+}
+
+.animate-scroll-cue {
+  animation: scroll-cue 1.8s ease-in-out infinite;
+}
+
+@media (max-width: 767px) {
+  .glass,
+  .glass-green {
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    backdrop-filter: blur(14px) saturate(150%);
+  }
+}
+
+@property --beam-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.border-beam {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: conic-gradient(
+    from var(--beam-angle),
+    transparent 0deg 250deg,
+    rgb(134 239 172 / 0.9) 300deg,
+    transparent 340deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  animation: beam-spin 7s linear infinite;
+}
+
+@keyframes beam-spin {
+  to {
+    --beam-angle: 360deg;
+  }
+}
+
+/* Text caret: blinks while idle, stays solid while text is being typed (.is-typing). */
+@layer components {
+  .caret {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.15em;
+    vertical-align: -0.2em;
+    background-color: rgb(74 222 128 / 0.85);
+    animation: caret-blink 1.05s step-end infinite;
+  }
+
+  .caret.is-typing {
+    animation: none;
+  }
+}
+
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
 }

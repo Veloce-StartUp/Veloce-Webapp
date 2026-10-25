@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import { Navigation } from "@/components/navigation";
 import { AllProductsSection } from "@/components/all-products-section";
 import { Footer } from "@/components/footer";
-import { InteractiveBackground } from "@/components/interactive-background";
-import { ScrollToTop } from "@/components/scroll-to-top";
 
 export const metadata: Metadata = {
   title: "Projects & Products",
@@ -16,14 +13,11 @@ export const metadata: Metadata = {
 
 export default function ProductsPage() {
   return (
-    <main className="min-h-screen bg-black relative overflow-hidden">
-      <InteractiveBackground />
-      <Navigation />
+    <main className="relative min-h-screen overflow-hidden">
       <div className="pt-20">
         <AllProductsSection />
       </div>
       <Footer />
-      <ScrollToTop />
     </main>
   );
 }
