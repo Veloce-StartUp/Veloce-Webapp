@@ -12,6 +12,7 @@ import { SmoothScroll } from "@/components/motion/smooth-scroll";
 import { ChapterIndex } from "@/components/chapters/chapter-index";
 import { ScrollRuler } from "@/components/chapters/scroll-ruler";
 import { SocialRail } from "@/components/social-rail";
+import { siteConfig } from "@/lib/site";
 
 import { Instrument_Serif, VT323 } from "next/font/google";
 
@@ -29,56 +30,53 @@ const instrumentSerif = Instrument_Serif({
   variable: "--font-instrument-serif",
 });
 
+// Social preview images come from app/opengraph-image.tsx and app/twitter-image.tsx.
 export const metadata: Metadata = {
   title: {
-    default: "Veloce - Innovative Software Solutions for Modern Businesses",
-    template: "%s | Veloce",
+    default: siteConfig.title,
+    template: `%s | ${siteConfig.name}`,
   },
-  description:
-    "Veloce designs and develops cutting-edge software solutions that empower businesses to grow, scale, and lead the future. Custom web applications, mobile apps, and enterprise solutions.",
+  description: siteConfig.description,
+  applicationName: siteConfig.name,
   keywords: [
-    "software development",
-    "web applications",
-    "mobile apps",
-    "enterprise solutions",
-    "custom software",
-    "technology consulting",
+    "Veloce Technology",
+    "Veloce",
+    "software development company Sri Lanka",
+    "software company Sri Lanka",
+    "web development Sri Lanka",
+    "mobile app development Sri Lanka",
+    "custom software development",
+    "event registration system",
+    "awards judging platform",
+    "membership management platform",
+    "cloud solutions",
+    "AI and automation",
   ],
-  authors: [{ name: "Veloce Technology" }],
-  creator: "Veloce Technology",
-  publisher: "Veloce Technology",
+  authors: [{ name: siteConfig.name, url: siteConfig.url }],
+  creator: siteConfig.name,
+  publisher: siteConfig.legalName,
+  category: "technology",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://veloce-technology.com"),
+  metadataBase: new URL(siteConfig.url),
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Veloce - Innovative Software Solutions for Modern Businesses",
-    description:
-      "Veloce designs and develops cutting-edge software solutions that empower businesses to grow, scale, and lead the future.",
-    url: "https://veloce-technology.com",
-    siteName: "Veloce",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Veloce - Innovative Software Solutions",
-      },
-    ],
+    title: siteConfig.title,
+    description: siteConfig.description,
+    url: "/",
+    siteName: siteConfig.name,
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Veloce - Innovative Software Solutions for Modern Businesses",
-    description:
-      "Veloce designs and develops cutting-edge software solutions that empower businesses to grow, scale, and lead the future.",
-    images: ["/twitter-image.jpg"],
+    title: siteConfig.title,
+    description: siteConfig.description,
     creator: "@velocetech",
   },
   robots: {
@@ -100,7 +98,6 @@ export const metadata: Metadata = {
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
   },
-  manifest: "/manifest.webmanifest",
 };
 
 import { Toaster } from "@/components/ui/sonner";

@@ -2,13 +2,16 @@ import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/** h1 when a section is the main content of its own page, h2 when it is one of the home page's sections. */
+export type HeadingLevel = "h1" | "h2";
+
 interface SectionHeadingProps {
   title: ReactNode;
   description?: ReactNode;
   eyebrow?: string;
   icon?: LucideIcon;
   align?: "center" | "left";
-  as?: "h1" | "h2";
+  as?: HeadingLevel;
   className?: string;
 }
 

@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import { ScheduleMeetingModal } from "@/components/schedule-meeting-modal";
-import { SectionHeading } from "@/components/section-heading";
+import { SectionHeading, type HeadingLevel } from "@/components/section-heading";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -58,7 +58,7 @@ const contactDetails = [
   },
 ];
 
-export function ContactSection() {
+export function ContactSection({ headingAs }: { headingAs?: HeadingLevel }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Initialize form
@@ -111,6 +111,7 @@ export function ContactSection() {
 
       <div className="container relative z-20 mx-auto px-4">
         <SectionHeading
+          as={headingAs}
           title={
             <>
               Get In <span className="text-gradient-green">Touch</span>

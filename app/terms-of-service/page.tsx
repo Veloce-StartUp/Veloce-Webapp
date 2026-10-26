@@ -1,14 +1,13 @@
 import type { Metadata } from "next"
 import { LegalPageLayout, LegalSection } from "@/components/legal-page-layout"
+import { pageMetadata } from "@/lib/site"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Terms of Service",
   description:
     "Read the terms and conditions governing your use of Veloce Technology (PVT) Limited's website, products, and mobile applications.",
-  alternates: {
-    canonical: "/terms-of-service",
-  },
-}
+  path: "/terms-of-service",
+})
 
 const LAST_UPDATED = "August 26, 2026"
 
