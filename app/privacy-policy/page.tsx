@@ -1,14 +1,13 @@
 import type { Metadata } from "next"
 import { LegalPageLayout, LegalSection } from "@/components/legal-page-layout"
+import { pageMetadata } from "@/lib/site"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Privacy Policy",
   description:
     "Learn how Veloce Technology (PVT) Limited collects, uses, and protects your personal information across our website, products, and mobile applications.",
-  alternates: {
-    canonical: "/privacy-policy",
-  },
-}
+  path: "/privacy-policy",
+})
 
 const LAST_UPDATED = "August 26, 2026"
 

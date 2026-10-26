@@ -13,39 +13,13 @@ import { RecognitionSection } from "@/components/recognition-section";
 import { JudgingPortalSection } from "@/components/judging-portal-section";
 import { RegistrationSection } from "@/components/registration-section";
 import { Chapter } from "@/components/chapters/chapter";
-import Script from "next/script";
-import { socialProfiles } from "@/lib/social";
-
-// Structured data for SEO
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "Veloce",
-  url: "https://veloce-technology.com",
-  logo: "/Veloce-Logo_White-Without-Name.png",
-  description:
-    "Veloce designs and develops cutting-edge software solutions that empower businesses to grow, scale, and lead the future.",
-  address: {
-    "@type": "PostalAddress",
-    // Add your company address here
-  },
-  contactPoint: {
-    "@type": "ContactPoint",
-    telephone: "+94 (76) 879-4004",
-    contactType: "customer service",
-  },
-  sameAs: socialProfiles.map((profile) => profile.href),
-};
+import { JsonLd } from "@/components/json-ld";
+import { organizationJsonLd } from "@/lib/site";
 
 export default function HomePage() {
   return (
     <main className="relative min-h-screen">
-      {/* Add JSON-LD structured data */}
-      <Script
-        id="organization-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={organizationJsonLd} />
 
       <Chapter label="Veloce">
         <Hero

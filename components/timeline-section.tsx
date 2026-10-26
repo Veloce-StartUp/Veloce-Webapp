@@ -4,7 +4,7 @@ import { useRef } from "react"
 import { ArrowRight, CheckCircle2, Code, FileText, Rocket, TestTube, Users } from "lucide-react"
 import { gsap, useGSAP } from "@/lib/gsap"
 import { useSmoothReady } from "@/components/motion/smooth-scroll"
-import { SectionHeading } from "@/components/section-heading"
+import { SectionHeading, type HeadingLevel } from "@/components/section-heading"
 import { cn } from "@/lib/utils"
 
 const developmentStages = [
@@ -70,7 +70,7 @@ const developmentStages = [
   },
 ]
 
-export function TimelineSection() {
+export function TimelineSection({ headingAs }: { headingAs?: HeadingLevel }) {
   const ready = useSmoothReady()
   const sectionRef = useRef<HTMLElement>(null)
   const pinRef = useRef<HTMLDivElement>(null)
@@ -138,6 +138,7 @@ export function TimelineSection() {
         >
           <div className="container relative z-20 mx-auto px-4">
             <SectionHeading
+                as={headingAs}
                 align="left"
                 className="mb-12 md:mb-12 lg:mb-14"
                 title={

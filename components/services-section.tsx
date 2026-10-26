@@ -5,7 +5,7 @@ import Link from "next/link"
 import { ArrowRight, Check, Cloud, Cpu, Database, Globe, Shield, Smartphone } from "lucide-react"
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap"
 import { useSmoothReady } from "@/components/motion/smooth-scroll"
-import { SectionHeading } from "@/components/section-heading"
+import { SectionHeading, type HeadingLevel } from "@/components/section-heading"
 import { cn } from "@/lib/utils"
 
 const services = [
@@ -59,7 +59,7 @@ const STACK_STEP = 22
 /** How much smaller each card behind the front one ends up, so the finished stack reads as a deck. */
 const STACK_SCALE_STEP = 0.03
 
-export function ServicesSection() {
+export function ServicesSection({ headingAs }: { headingAs?: HeadingLevel }) {
   const ready = useSmoothReady()
   const sectionRef = useRef<HTMLElement>(null)
 
@@ -123,6 +123,7 @@ export function ServicesSection() {
       <section ref={sectionRef} id="services" className="relative py-24 md:py-32">
         <div className="container relative z-20 mx-auto px-4">
           <SectionHeading
+              as={headingAs}
               title={
                 <>
                   Our <span className="text-gradient-green">Services</span>

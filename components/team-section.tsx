@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Github, Linkedin, Mail, Twitter } from "lucide-react";
-import { SectionHeading } from "@/components/section-heading";
+import { SectionHeading, type HeadingLevel } from "@/components/section-heading";
 
 interface TeamMember {
   name: string;
@@ -79,11 +79,12 @@ function socialLinks(social: TeamMember["social"]) {
   return links.filter((link) => link.href && link.href !== "#");
 }
 
-export function TeamSection() {
+export function TeamSection({ headingAs }: { headingAs?: HeadingLevel }) {
   return (
     <section id="team" className="relative py-24 md:py-32">
       <div className="container relative z-20 mx-auto px-4">
         <SectionHeading
+          as={headingAs}
           title={
             <>
               Meet Our <span className="text-gradient-green">Team</span>
