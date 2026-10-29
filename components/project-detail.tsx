@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { ProductCard } from "@/components/product-card";
+import { StoreBadges } from "@/components/store-badges";
 import { getProjectBySlug, getRelatedProjects } from "@/lib/projects";
 import { cn } from "@/lib/utils";
 
@@ -126,6 +127,12 @@ export function ProjectDetail({ slug }: ProjectDetailProps) {
                 );
               })}
             </div>
+
+            {project.app && (
+              <div data-reveal className="mb-8">
+                <StoreBadges app={project.app} />
+              </div>
+            )}
 
             <div data-reveal className="flex flex-wrap gap-3">
               {project.url && (

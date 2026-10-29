@@ -17,6 +17,14 @@ export interface ProjectHighlight {
   description: string;
 }
 
+/** A companion mobile app and its store listings. */
+export interface ProjectApp {
+  /** Name as it appears on the stores */
+  name: string;
+  appStore?: string;
+  googlePlay?: string;
+}
+
 export interface Project {
   /** URL segment used by /products/[slug] */
   slug: string;
@@ -42,6 +50,7 @@ export interface Project {
   gallery: string[];
   color: string;
   url?: string;
+  app?: ProjectApp;
   /** Shown on the landing page section */
   featured: boolean;
 }
@@ -104,6 +113,11 @@ export const projects: Project[] = [
     ],
     color: "from-emerald-600 to-teal-600",
     url: "https://www.cssl.lk",
+    app: {
+      name: "Digital CSSL",
+      appStore: "https://apps.apple.com/app/id6795530601",
+      googlePlay: "https://play.google.com/store/apps/details?id=com.build.velocetechnology.digitalcssl",
+    },
     featured: true,
   },
   {

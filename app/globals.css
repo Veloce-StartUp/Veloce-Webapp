@@ -740,6 +740,34 @@ html {
   }
 }
 
+/* Auto-advancing showcase: the active tab's bar fills and the showcase moves on when it ends
+   (animationend). It runs only while the showcase is in view ([data-playing]), and holds while
+   it is hovered or one of its tabs has keyboard focus. */
+.showcase-progress {
+  transform-origin: left;
+  animation: showcase-progress 6s linear forwards paused;
+}
+
+[data-playing] .showcase-progress {
+  animation-play-state: running;
+}
+
+@media (hover: hover) {
+  [data-playing]:hover .showcase-progress {
+    animation-play-state: paused;
+  }
+}
+
+[data-playing]:has(:focus-visible) .showcase-progress {
+  animation-play-state: paused;
+}
+
+@keyframes showcase-progress {
+  from {
+    transform: scaleX(0);
+  }
+}
+
 /* Scroll reveal start states (animated by the SmoothScroll provider) */
 [data-reveal]:not(.is-revealed) {
   opacity: 0;
@@ -757,7 +785,8 @@ html {
   .btn-primary::before,
   .btn-glass::before,
   .border-beam,
-  .caret {
+  .caret,
+  .showcase-progress {
     transition: none;
     animation: none;
   }

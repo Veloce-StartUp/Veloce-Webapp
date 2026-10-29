@@ -28,7 +28,7 @@ const linkGroups = [
       { label: "Judging Portal", href: "/#judging-portal" },
       { label: "Event Registration", href: "/#event-registration" },
       { label: "Web Development", href: "/#services" },
-      { label: "Mobile Apps", href: "/#services" },
+      { label: "Mobile Apps", href: "/#mobile-apps" },
       { label: "Cloud & AI", href: "/#services" },
     ],
   },
