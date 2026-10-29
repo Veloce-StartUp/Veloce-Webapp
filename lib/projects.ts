@@ -4,6 +4,7 @@ import {
   ClipboardCheck,
   GraduationCap,
   Leaf,
+  Medal,
   ShoppingCart,
   Trophy,
   Users,
@@ -278,6 +279,59 @@ export const projects: Project[] = [
     ],
     color: "from-indigo-700 to-amber-500",
     url: "https://slanshei-awards-judging-platform-web-app.onrender.com",
+    featured: true,
+  },
+  {
+    slug: "cssl-national-cio-list",
+    productName: "CSSL National CIO List",
+    title: "Application & Judging Platform",
+    description:
+      "Application and judging platform for the CSSL National CIO List, which honours Sri Lanka's top Chief Information Officers.",
+    overview: [
+      "The CSSL National CIO List is the country's first initiative recognising outstanding CIO leadership. For its fourth edition, the Computer Society of Sri Lanka runs the programme on the platform we built, from the public site and honour roll to the final evaluation.",
+      "Candidates verify their email with a one-time code, then build an application that responds to each element of the 12-element CSSL CIO Model, saving drafts as they go. An independent panel of industry experts scores the submissions from a separate judges' portal, while administrators manage criteria, panels and results.",
+    ],
+    icon: Medal,
+    status: "Live",
+    category: "Awards Platform",
+    year: "2026",
+    client: "Computer Society of Sri Lanka (CSSL)",
+    platforms: ["Web"],
+    features: [
+      "Email Verification",
+      "12-element CIO Model Applications",
+      "Save & Resume Drafts",
+      "Judges' Portal",
+      "Conflict-of-interest Recusals",
+      "Results Export to PDF & Excel",
+      "Past Honourees Directory",
+    ],
+    highlights: [
+      {
+        title: "Built around the CIO Model",
+        description:
+          "Every application answers each of the 12 elements, so the panel compares candidates against the same framework.",
+      },
+      {
+        title: "An independent panel, kept independent",
+        description:
+          "Judges work in their own portal and step aside from any candidate they have a conflict of interest with.",
+      },
+      {
+        title: "Every edition on record",
+        description:
+          "A searchable honour roll showcases every CIO recognised since the first list in 2023.",
+      },
+    ],
+    techStack: ["Next.js", "Node.js", "Express", "MySQL", "Tailwind CSS"],
+    image: "/Products/CIO-List/CIO-List-Platform.jpg",
+    gallery: [
+      "/Products/CIO-List/CIO-List-Platform-cio-model.png",
+      "/Products/CIO-List/CIO-List-Platform-how-to-apply.png",
+      "/Products/CIO-List/CIO-List-Platform-verify.png",
+    ],
+    color: "from-blue-700 to-violet-600",
+    url: "https://www.cio.cssl.lk",
     featured: true,
   },
   {
