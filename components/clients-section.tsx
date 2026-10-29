@@ -13,6 +13,8 @@ interface Client {
   alt: string;
   /** For logos made for dark backgrounds (default tile is white). */
   tileClassName?: string;
+  /** For tall logos, which need less padding to read at the tile's height. */
+  logoClassName?: string;
 }
 
 const clients: Client[] = [
@@ -53,6 +55,13 @@ const clients: Client[] = [
     logo: "/slanshei-logo.png",
     website: "https://www.slanshei.lk",
     alt: "Sri Lanka Association of Non-State Higher Education Institutes",
+  },
+  {
+    name: "CIO List",
+    logo: "/cio-list-logo.png",
+    website: "https://www.cio.cssl.lk",
+    alt: "CSSL National CIO List",
+    logoClassName: "p-2",
   },
   {
     name: "Logic Leaf Technologies",
@@ -177,7 +186,10 @@ function ClientCard({
             alt={client.alt}
             fill
             sizes="240px"
-            className="object-contain p-4 transition-transform duration-500 group-hover/logo:scale-105"
+            className={cn(
+              "object-contain p-4 transition-transform duration-500 group-hover/logo:scale-105",
+              client.logoClassName,
+            )}
           />
         </div>
       </div>

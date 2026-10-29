@@ -22,14 +22,17 @@ const orbitShots = [
   "/hero/nitc-2026.jpg",
   "/hero/dex-judging-platform.jpg",
   "/hero/slanshei-awards-platform.jpg",
+  "/hero/cio-list-platform-cio-model.jpg",
   "/hero/nitc-2026-technology-partner.jpg",
   "/hero/logic-leaf-technologies.jpg",
+  "/hero/cio-list-platform.jpg",
   "/hero/cssl-awards.jpg",
   "/hero/nitc-2025.jpg",
   "/hero/dex-judging-platform-dashboard.jpg",
   "/hero/bloodsmate.jpg",
   "/hero/nitc-2026-about.jpg",
   "/hero/digital-cssl-news.jpg",
+  "/hero/cio-list-platform-dashboard.jpg",
   "/hero/slanshei-awards-platform-awards.jpg",
   "/hero/logic-leaf-products.jpg",
 ];
@@ -37,9 +40,9 @@ const orbitShots = [
 /** Rings are sized as a fraction of the hero's half-width and squashed into ellipses for depth. */
 const RING_SQUASH = 0.5;
 const rings = [
-  { radius: 0.48, speed: 0.05, cards: 4, width: 150 },
-  { radius: 0.7, speed: -0.035, cards: 5, width: 175 },
-  { radius: 0.92, speed: 0.025, cards: 5, width: 200 },
+  { radius: 0.48, speed: 0.05, cards: 5, width: 150 },
+  { radius: 0.7, speed: -0.035, cards: 6, width: 175 },
+  { radius: 0.92, speed: 0.025, cards: 6, width: 200 },
 ];
 
 const orbitCards = rings.flatMap((ring, ringIndex) =>

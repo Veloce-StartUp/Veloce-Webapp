@@ -29,6 +29,7 @@ const ROTATE_SECONDS = 7;
 const platforms = [
   { slug: "digital-excellence-awards", label: "DEX" },
   { slug: "slanshei-higher-education-awards", label: "SLANSHEI" },
+  { slug: "cssl-national-cio-list", label: "CIO List" },
   { slug: "cssl-awards", label: "CSSL Awards" },
 ].flatMap(({ slug, label }) => {
   const project = getProjectBySlug(slug);
@@ -220,7 +221,7 @@ export function JudgingPortalSection() {
               Awards judging, <span className="text-gradient-green">without the spreadsheets</span>
             </>
           }
-          description="One platform for the full awards cycle: verified entries, judge panels, criteria-based scoring and automated results. Already trusted by three awards programmes in Sri Lanka."
+          description="One platform for the full awards cycle: verified entries, judge panels, criteria-based scoring and automated results. Already trusted by four awards programmes in Sri Lanka."
         />
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10">
@@ -286,7 +287,7 @@ export function JudgingPortalSection() {
               aria-label="Judging portal case studies"
               onKeyDown={onTabKeyDown}
               data-reveal="right"
-              className="glass mb-4 grid grid-cols-3 gap-1 rounded-2xl p-1.5"
+              className="glass mb-4 grid grid-cols-4 gap-1 rounded-2xl p-1.5"
             >
               {platforms.map((platform, index) => {
                 const isActive = index === activeIndex;
@@ -304,14 +305,14 @@ export function JudgingPortalSection() {
                     tabIndex={isActive ? 0 : -1}
                     onClick={() => setActiveIndex(index)}
                     className={cn(
-                      "relative overflow-hidden rounded-xl px-3 pb-4 pt-3 text-sm font-medium transition-colors duration-300",
+                      "relative overflow-hidden rounded-xl px-1 pb-4 pt-3 text-xs font-medium transition-colors duration-300 sm:text-sm",
                       isActive
                         ? "bg-white/[0.08] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
                         : "text-gray-300 hover:text-white",
                     )}
                   >
                     {platform.label}
-                    <span className="absolute inset-x-4 bottom-2 h-0.5 overflow-hidden rounded-full bg-white/10">
+                    <span className="absolute inset-x-3 bottom-2 h-0.5 overflow-hidden rounded-full bg-white/10 sm:inset-x-4">
                       <span
                         ref={(el) => {
                           barRefs.current[index] = el;
@@ -355,7 +356,7 @@ export function JudgingPortalSection() {
               </div>
             </div>
 
-            {/* All three details stack in one grid cell, so rotating platforms never changes the height. */}
+            {/* All the details stack in one grid cell, so rotating platforms never changes the height. */}
             <div data-reveal="right" className="glass mt-4 grid rounded-[1.75rem]">
               {platforms.map((platform, index) => {
                 const { project } = platform;
