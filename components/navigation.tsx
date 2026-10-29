@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Gavel, Menu, Ticket, X } from "lucide-react";
+import { ChevronDown, Gavel, Menu, Smartphone, Ticket, X } from "lucide-react";
 import { ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +28,12 @@ const solutions = [
     id: "event-registration",
     description: "Delegate registration, payments and badges",
     icon: Ticket,
+  },
+  {
+    label: "Mobile Apps",
+    id: "mobile-apps",
+    description: "iOS and Android apps, live on both stores",
+    icon: Smartphone,
   },
 ];
 

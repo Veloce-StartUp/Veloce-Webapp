@@ -12,6 +12,7 @@ import { ClientsSection } from "@/components/clients-section";
 import { RecognitionSection } from "@/components/recognition-section";
 import { JudgingPortalSection } from "@/components/judging-portal-section";
 import { RegistrationSection } from "@/components/registration-section";
+import { MobileAppsSection } from "@/components/mobile-apps-section";
 import { Chapter } from "@/components/chapters/chapter";
 import { JsonLd } from "@/components/json-ld";
 import { organizationJsonLd } from "@/lib/site";
@@ -45,6 +46,9 @@ export default function HomePage() {
       <Chapter label="Solutions">
         <JudgingPortalSection />
         <RegistrationSection />
+      </Chapter>
+      <Chapter label="Mobile Apps">
+        <MobileAppsSection />
       </Chapter>
       <Chapter label="Products">
         <ProductsSection />
