@@ -29,12 +29,6 @@ const clients: Client[] = [
     alt: "National IT Conference 2025",
   },
   {
-    name: "SLANSHEI",
-    logo: "/slanshei-logo.png",
-    website: "https://www.slanshei.lk",
-    alt: "Sri Lanka Association of Non-State Higher Education Institutes",
-  },
-  {
     name: "NITC 2026",
     logo: "/nitc-2026-logo.png",
     website: "https://nitc.lk",
@@ -50,20 +44,27 @@ const clients: Client[] = [
   {
     name: "DIGITAL EXCELLENCE AWARDS",
     logo: "/digital-excellence-logo.svg",
-    website: "https://www.digitalexcellenceawards.lk",
+    website: "https://digitalexecellence.lk",
     alt: "Digital Excellence Awards",
+    tileClassName: "bg-black"
   },
   {
-    name: "Clayton Family Medical Centre",
-    logo: "/clayton-family-medical-centre.png",
-    website: "https://claytonfmc.com.au/",
-    alt: "Clayton Family Medical Centre",
+    name: "SLANSHEI",
+    logo: "/slanshei-logo.png",
+    website: "https://www.slanshei.lk",
+    alt: "Sri Lanka Association of Non-State Higher Education Institutes",
   },
   {
     name: "Logic Leaf Technologies",
     logo: "/logo-cropped.png",
     website: "https://logicleaftechnologies.com",
     alt: "Logic Leaf Technologies",
+  },
+  {
+    name: "Clayton Family Medical Centre",
+    logo: "/clayton-family-medical-centre.png",
+    website: "https://claytonfmc.com.au/",
+    alt: "Clayton Family Medical Centre",
   },
 ];
 
