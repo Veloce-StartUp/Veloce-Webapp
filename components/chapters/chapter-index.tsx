@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Flip, gsap, ScrollTrigger } from "@/lib/gsap";
+import { Flip } from "gsap/Flip";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { scrollToTarget } from "@/lib/scroll";
 import { usePageChapters, type PageChapter } from "@/components/chapters/use-page-chapters";
 import { cn } from "@/lib/utils";
+
+// Registered here rather than in lib/gsap, so phones (which never load this file) skip Flip.
+gsap.registerPlugin(Flip);
 
 function ChapterLink({
   chapter,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { gsap, useGSAP } from "@/lib/gsap";
+import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
 
 /** Fixed glow + grid layer behind the whole site; it's what the glass panels blur. */
 export function AmbientBackground() {
@@ -10,6 +10,8 @@ export function AmbientBackground() {
   useGSAP(
     () => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      // Full-screen layers moving under every scroll frame are too much for a phone's GPU.
+      if (ScrollTrigger.isTouch === 1) return;
 
       // The orbs drift as the page scrolls, so every section sits on a slightly different glow.
       const scrollTrigger = {

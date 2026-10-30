@@ -15,6 +15,8 @@ const DottedSurface = dynamic(
   { ssr: false },
 );
 
+const SURFACE_LOAD_DELAY = 400;
+
 const promises = [
   { icon: CheckCircle2, title: "Free consultation", text: "Talk your idea through with our team." },
   { icon: Clock, title: "Replies within 24h", text: "Every enquiry gets a quick, real answer." },
@@ -52,16 +54,21 @@ export function Footer() {
   useEffect(() => {
     const footer = footerRef.current;
     if (!footer) return;
+    let timer = 0;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return;
-        setShowSurface(true);
         observer.disconnect();
+        // Parsing three.js holds up the page for a moment, so leave a beat for the scroll to settle.
+        timer = window.setTimeout(() => setShowSurface(true), SURFACE_LOAD_DELAY);
       },
       { rootMargin: "600px 0px" },
     );
     observer.observe(footer);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(timer);
+    };
   }, []);
 
   // The wordmark rises into place as the footer scrolls in.

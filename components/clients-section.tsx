@@ -185,7 +185,7 @@ function ClientCard({
             src={client.logo}
             alt={client.alt}
             fill
-            sizes="240px"
+            sizes="(min-width: 768px) 240px, 176px"
             className={cn(
               "object-contain p-4 transition-transform duration-500 group-hover/logo:scale-105",
               client.logoClassName,

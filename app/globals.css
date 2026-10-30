@@ -768,17 +768,63 @@ html {
   }
 }
 
-/* Scroll reveal start states (animated by the SmoothScroll provider) */
-[data-reveal]:not(.is-revealed) {
-  opacity: 0;
+/* Scroll reveal start states (animated by the SmoothScroll provider). With a mouse only: touch
+   scrolling outruns JavaScript, so on touch nothing starts hidden, and a slow script can only
+   ever mean a missing animation, never a blank screen. */
+@media (hover: hover) and (pointer: fine) {
+  [data-reveal]:not(.is-revealed) {
+    opacity: 0;
+  }
+
+  [data-split]:not(.is-split) {
+    visibility: hidden;
+  }
+
+  .hero-root:not(.is-ready) [data-hero] {
+    opacity: 0;
+  }
 }
 
-[data-split]:not(.is-split) {
+/* Until the hero's script places them, the orbiting cards are all stacked in the centre. */
+.hero-root:not(.is-ready) .orbit-card {
   visibility: hidden;
 }
 
-.hero-root:not(.is-ready) [data-hero] {
-  opacity: 0;
+/* On touch the hero copy needs no script at all, so it shows with the first paint. */
+@media (hover: none), (pointer: coarse) {
+  .hero-root [data-hero] {
+    animation: hero-rise 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .hero-root [data-hero="eyebrow"] {
+    --hero-rise: -20px;
+    animation-delay: 0.1s;
+  }
+
+  .hero-root [data-hero="title"] {
+    --hero-rise: 40px;
+    animation-delay: 0.2s;
+  }
+
+  .hero-root [data-hero="subtitle"] {
+    animation-delay: 0.45s;
+  }
+
+  .hero-root [data-hero="cta"] {
+    animation-delay: 0.55s;
+  }
+
+  .hero-root [data-hero="band"] {
+    --hero-rise: 100%;
+    animation-delay: 0.7s;
+  }
+}
+
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, var(--hero-rise, 30px), 0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -786,7 +832,8 @@ html {
   .btn-glass::before,
   .border-beam,
   .caret,
-  .showcase-progress {
+  .showcase-progress,
+  .hero-root [data-hero] {
     transition: none;
     animation: none;
   }
@@ -903,6 +950,32 @@ html {
   .glass-green {
     -webkit-backdrop-filter: blur(14px) saturate(150%);
     backdrop-filter: blur(14px) saturate(150%);
+  }
+}
+
+/* A phone redraws every background blur on every scroll frame, and panels in the page only ever
+   blur the near-black backdrop, so they look the same without it. The rest keep theirs: pills sit
+   on photos, the hero's screenshots pass behind its controls, and everything outside
+   #smooth-wrapper (the nav, menus and dialogs) floats over content. */
+@media (max-width: 1023px) and (hover: none), (max-width: 1023px) and (pointer: coarse) {
+  #smooth-wrapper :is(.glass, .glass-strong, .glass-green, .btn-glass, [class*="backdrop-blur"]):not(.rounded-full, .hero-root *) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* Endless loops only run near the screen; the SmoothScroll provider sets data-on-screen. */
+.animate-pulse-ring:not([data-on-screen]),
+.animate-pulse:not([data-on-screen]),
+.border-beam:not([data-on-screen]) {
+  animation: none;
+}
+
+/* The drifting glow is barely visible, but three huge moving layers are not cheap. */
+@media (hover: none), (pointer: coarse) {
+  .ambient-orb {
+    animation: none;
+    will-change: auto;
   }
 }
 

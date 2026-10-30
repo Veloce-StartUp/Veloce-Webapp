@@ -4,13 +4,15 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
-import { SplashCursor } from "@/components/ui/splash-cursor";
 import { AmbientBackground } from "@/components/ambient-background";
 import { Navigation } from "@/components/navigation";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { SmoothScroll } from "@/components/motion/smooth-scroll";
-import { ChapterIndex } from "@/components/chapters/chapter-index";
-import { ScrollRuler } from "@/components/chapters/scroll-ruler";
+import {
+  DeferredSplashCursor,
+  DesktopChapterIndex,
+  DesktopScrollRuler,
+} from "@/components/deferred-effects";
 import { SocialRail } from "@/components/social-rail";
 import { siteConfig } from "@/lib/site";
 
@@ -20,12 +22,14 @@ const vt323 = VT323({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-vt323",
+  // Only the small arc of text around the logo, far down the page.
+  preload: false,
 });
 
 /** Serif italic for the highlighted words in headlines. */
 const instrumentSerif = Instrument_Serif({
   weight: "400",
-  style: ["normal", "italic"],
+  style: "italic",
   subsets: ["latin"],
   variable: "--font-instrument-serif",
 });
@@ -124,15 +128,15 @@ export default function RootLayout({
         suppressHydrationWarning={true}
       >
         <AmbientBackground />
-        <SplashCursor
+        <DeferredSplashCursor
           SPLAT_FORCE={1500}
           SPLAT_RADIUS={0.1}
           DISABLE_ON_INTERACTIVE={true}
         />
         <Navigation />
         <SmoothScroll>{children}</SmoothScroll>
-        <ChapterIndex />
-        <ScrollRuler />
+        <DesktopChapterIndex />
+        <DesktopScrollRuler />
         <SocialRail />
         <ScrollToTop />
         <Analytics />

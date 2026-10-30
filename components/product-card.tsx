@@ -45,8 +45,8 @@ export function ProductCard({ project, wide = false, className }: ProductCardPro
           height={820}
           sizes={
             wide
-              ? "(min-width: 1024px) 40vw, (min-width: 768px) 50vw, 100vw"
-              : "(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+              ? "(min-width: 1024px) 40vw, (min-width: 768px) 50vw, calc(100vw - 48px)"
+              : "(min-width: 1024px) 33vw, (min-width: 768px) 50vw, calc(100vw - 48px)"
           }
           className={cn(
             "h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-105",

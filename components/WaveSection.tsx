@@ -33,6 +33,8 @@ const CentralLogo = () => (
     <img
         src="https://res.cloudinary.com/druqq6b0a/image/upload/f_auto,q_auto,w_192/v1757878293/VELOCE_Digital_Company_Logo_2_worjb4.png"
         alt="Logo"
+        loading="lazy"
+        decoding="async"
         className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover shadow-lg"
         onError={(e) => {
             const target = e.target as HTMLImageElement;
