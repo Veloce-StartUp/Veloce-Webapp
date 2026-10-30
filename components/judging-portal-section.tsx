@@ -108,6 +108,8 @@ export function JudgingPortalSection() {
   const barRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const progressTween = useRef<gsap.core.Tween | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  // One screenshot ahead of the active one is mounted, so the next fade has its image ready.
+  const [mountedUpTo, setMountedUpTo] = useState(1);
   const [inView, setInView] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -184,6 +186,10 @@ export function JudgingPortalSection() {
     },
     { dependencies: [activeIndex], scope: showcaseRef, revertOnUpdate: true },
   );
+
+  useEffect(() => {
+    setMountedUpTo((upTo) => Math.max(upTo, Math.min(activeIndex + 1, platforms.length - 1)));
+  }, [activeIndex]);
 
   useEffect(() => {
     const tween = progressTween.current;
@@ -340,13 +346,13 @@ export function JudgingPortalSection() {
                 </span>
               </div>
               <div className="relative aspect-[39/20] overflow-hidden rounded-[1.25rem] bg-black">
-                {platforms.map((platform, index) => (
+                {platforms.slice(0, mountedUpTo + 1).map((platform, index) => (
                   <Image
                     key={platform.label}
                     src={platform.project.image}
                     alt={`${platform.project.productName} screenshot`}
                     fill
-                    sizes="(min-width: 1024px) 58vw, 100vw"
+                    sizes="(min-width: 1024px) 58vw, calc(100vw - 48px)"
                     className={cn(
                       "object-cover object-top transition-all duration-700",
                       index === activeIndex ? "scale-100 opacity-100" : "scale-[1.04] opacity-0",

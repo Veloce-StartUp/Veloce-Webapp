@@ -107,7 +107,7 @@ export function TeamSection({ headingAs }: { headingAs?: HeadingLevel }) {
                   src={member.image || "/placeholder.svg"}
                   alt={member.name}
                   fill
-                  sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                  sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, calc(100vw - 48px)"
                   className="object-cover object-top transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />

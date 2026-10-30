@@ -170,7 +170,7 @@ export function ProjectDetail({ slug }: ProjectDetailProps) {
                 alt={`${project.productName} cover`}
                 width={1920}
                 height={985}
-                sizes="(min-width: 1024px) 50vw, 100vw"
+                sizes="(min-width: 1024px) 50vw, calc(100vw - 48px)"
                 priority
                 className="relative h-auto w-full object-cover"
               />
@@ -306,7 +306,7 @@ export function ProjectDetail({ slug }: ProjectDetailProps) {
                     alt={`${project.productName} screenshot ${index + 1}`}
                     width={1200}
                     height={615}
-                    sizes="(min-width: 768px) 33vw, 100vw"
+                    sizes="(min-width: 768px) 33vw, calc(100vw - 48px)"
                     className="h-56 w-full rounded-[1.1rem] object-cover object-top transition-transform duration-500 group-hover:scale-105"
                   />
                   <span className="glass absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">

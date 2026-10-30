@@ -26,6 +26,9 @@ export function DottedSurface({ className, dotColor = 'white', ...props }: Dotte
 		const AMOUNTY = 60;
 		// Wave phase per second: the original 0.1 per frame at 60 fps.
 		const WAVE_SPEED = 6;
+		// Touch screens draw just under 30 fps (so timing jitter can't halve it): a slow wave looks
+		// the same, and a phone is spared a full-width canvas redraw on every display refresh.
+		const MIN_FRAME_TIME = window.matchMedia('(hover: none), (pointer: coarse)').matches ? 1000 / 32 : 0;
 
 		// Scene setup
 		const scene = new THREE.Scene();
@@ -106,6 +109,7 @@ export function DottedSurface({ className, dotColor = 'white', ...props }: Dotte
 		const animate = (time: number) => {
 			if (!visible) return;
 			animationId = requestAnimationFrame(animate);
+			if (lastTime !== null && time - lastTime < MIN_FRAME_TIME) return;
 
 			// Advance by elapsed time rather than per frame, so the wave keeps the same pace on 60 Hz and 120 Hz screens.
 			const elapsed = lastTime === null ? 0 : Math.min((time - lastTime) / 1000, 0.1);

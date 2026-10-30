@@ -32,6 +32,15 @@ export function useSmoothReady() {
 
 const splitInstances = new Set<SplitText>();
 
+/**
+ * Endless decorative CSS loops. Their animation is removed entirely while off screen (globals.css):
+ * pausing is not enough, as just having one keeps the browser rebuilding its layers every frame.
+ */
+const LOOPS = ".animate-pulse-ring, .animate-pulse, .border-beam";
+
+/** Elements that `bindScrollEffects` acts on. */
+const BINDABLE = `[data-reveal], [data-split], [data-speed], [data-lag], ${LOOPS}`;
+
 const REVEAL_FROM: Record<string, gsap.TweenVars> = {
   up: { y: 56 },
   down: { y: -56 },
@@ -43,9 +52,78 @@ const REVEAL_FROM: Record<string, gsap.TweenVars> = {
 
 /** Reveals in one batch stagger by 0.08s each, up to this many steps. */
 const MAX_STAGGER_STEPS = 5;
+const MAX_TOUCH_STAGGER_STEPS = 2;
+
+/** How long the page's height has to hold still before trigger positions are re-measured (ms). */
+const REFRESH_DELAY = 150;
+
+/** Touch reveals start this far below the screen (fraction of its height), so they are under way on arrival. */
+const ARRIVAL_LEAD = 0.15;
+/** A reveal that would start with the element's top above this line (fraction of the screen) is too late. */
+const ARRIVAL_CUTOFF = 0.95;
+
+/** Everything observed through `whenArriving`, so a route change can let go of the old page. */
+const arrivalObservers = new Set<IntersectionObserver>();
+
+let loopObserver: IntersectionObserver | null = null;
 
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function isTouchOnly() {
+  return ScrollTrigger.isTouch === 1;
+}
+
+/**
+ * Touch scrolling runs ahead of JavaScript, so content hidden until a script reacts can fly past
+ * blank, and a one-time reveal then plays after the visitor has gone. So on touch, content stays
+ * visible (see globals.css) until `animate` claims it just below the screen. If that comes too
+ * late, because the element is already on screen, `settle` runs instead and nothing flashes.
+ */
+function whenArriving(
+  elements: HTMLElement[],
+  animate: (el: HTMLElement, order: number) => void,
+  settle: (el: HTMLElement) => void,
+) {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      let order = 0;
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        observer.unobserve(entry.target);
+
+        const el = entry.target as HTMLElement;
+        if (entry.boundingClientRect.top < window.innerHeight * ARRIVAL_CUTOFF) settle(el);
+        else animate(el, order++);
+      });
+    },
+    { rootMargin: `0px 0px ${ARRIVAL_LEAD * 100}% 0px` },
+  );
+
+  elements.forEach((el) => observer.observe(el));
+  arrivalObservers.add(observer);
+}
+
+function playReveal(el: HTMLElement, order: number) {
+  const from = REVEAL_FROM[el.dataset.reveal || "up"] ?? REVEAL_FROM.up;
+  gsap.fromTo(
+    el,
+    { opacity: 0, x: 0, y: 0, scale: 1, ...from },
+    {
+      opacity: 1,
+      x: 0,
+      y: 0,
+      scale: 1,
+      duration: 1.1,
+      ease: "expo.out",
+      delay: order * 0.08 + (Number(el.dataset.revealDelay) || 0),
+      onComplete: () => {
+        el.classList.add("is-revealed");
+        gsap.set(el, { clearProps: "opacity,transform" });
+      },
+    },
+  );
 }
 
 /** Fades in every `[data-reveal]` element the first time it scrolls into view. */
@@ -62,6 +140,15 @@ function bindReveals(root: ParentNode, reduced: boolean) {
     return;
   }
 
+  if (isTouchOnly()) {
+    whenArriving(
+      elements,
+      (el, order) => playReveal(el, Math.min(order, MAX_TOUCH_STAGGER_STEPS)),
+      (el) => el.classList.add("is-revealed"),
+    );
+    return;
+  }
+
   ScrollTrigger.batch(elements, {
     start: "top 90%",
     once: true,
@@ -75,28 +162,29 @@ function bindReveals(root: ParentNode, reduced: boolean) {
           return;
         }
 
-        const order = Math.min(index++, MAX_STAGGER_STEPS);
-        const from = REVEAL_FROM[el.dataset.reveal || "up"] ?? REVEAL_FROM.up;
-        gsap.fromTo(
-          el,
-          { opacity: 0, x: 0, y: 0, scale: 1, ...from },
-          {
-            opacity: 1,
-            x: 0,
-            y: 0,
-            scale: 1,
-            duration: 1.1,
-            ease: "expo.out",
-            delay: order * 0.08 + (Number(el.dataset.revealDelay) || 0),
-            onComplete: () => {
-              el.classList.add("is-revealed");
-              gsap.set(el, { clearProps: "opacity,transform" });
-            },
-          },
-        );
+        playReveal(el, Math.min(index++, MAX_STAGGER_STEPS));
       });
     },
   });
+}
+
+function splitHeading(el: HTMLElement, scrollTrigger?: ScrollTrigger.Vars) {
+  const split = SplitText.create(el, {
+    type: "lines",
+    mask: "lines",
+    autoSplit: true,
+    onSplit(self) {
+      el.classList.add("is-split");
+      return gsap.from(self.lines, {
+        yPercent: 110,
+        duration: 1.2,
+        ease: "expo.out",
+        stagger: 0.1,
+        scrollTrigger,
+      });
+    },
+  });
+  splitInstances.add(split);
 }
 
 /** Splits `[data-split]` headings into masked lines that slide up when they scroll into view. */
@@ -104,32 +192,23 @@ function bindSplits(root: ParentNode, reduced: boolean) {
   const headings = Array.from(
     root.querySelectorAll<HTMLElement>("[data-split]:not([data-split-bound])"),
   );
+  headings.forEach((el) => el.setAttribute("data-split-bound", ""));
 
-  headings.forEach((el) => {
-    el.setAttribute("data-split-bound", "");
+  if (reduced) {
+    headings.forEach((el) => el.classList.add("is-split"));
+    return;
+  }
 
-    if (reduced) {
-      el.classList.add("is-split");
-      return;
-    }
+  if (isTouchOnly()) {
+    whenArriving(
+      headings,
+      (el) => splitHeading(el),
+      (el) => el.classList.add("is-split"),
+    );
+    return;
+  }
 
-    const split = SplitText.create(el, {
-      type: "lines",
-      mask: "lines",
-      autoSplit: true,
-      onSplit(self) {
-        el.classList.add("is-split");
-        return gsap.from(self.lines, {
-          yPercent: 110,
-          duration: 1.2,
-          ease: "expo.out",
-          stagger: 0.1,
-          scrollTrigger: { trigger: el, start: "top 90%", once: true },
-        });
-      },
-    });
-    splitInstances.add(split);
-  });
+  headings.forEach((el) => splitHeading(el, { trigger: el, start: "top 90%", once: true }));
 }
 
 /** Parallax for `[data-speed]` / `[data-lag]` elements (needs ScrollSmoother). */
@@ -148,10 +227,30 @@ function bindSpeedEffects(root: ParentNode) {
   smoother.effects(elements);
 }
 
+/** Marks `LOOPS` elements while they are near the screen, which is what lets them animate. */
+function bindLoops(root: ParentNode) {
+  loopObserver ??= new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => entry.target.toggleAttribute("data-on-screen", entry.isIntersecting));
+    },
+    { rootMargin: "100px 0px" },
+  );
+
+  const observer = loopObserver;
+  root.querySelectorAll(LOOPS).forEach((el) => observer.observe(el));
+}
+
 function bindScrollEffects(root: ParentNode, reduced: boolean) {
   bindSpeedEffects(root);
   bindReveals(root, reduced);
   bindSplits(root, reduced);
+  bindLoops(root);
+}
+
+function releaseObservers() {
+  arrivalObservers.forEach((observer) => observer.disconnect());
+  arrivalObservers.clear();
+  loopObserver?.disconnect();
 }
 
 function revertDetachedSplits() {
@@ -297,24 +396,37 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
 
     const reduced = prefersReducedMotion();
     let frame = 0;
-    let lastHeight = content.offsetHeight;
-    const observer = new MutationObserver(() => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        bindScrollEffects(content, reduced);
+    const mutationObserver = new MutationObserver((mutations) => {
+      // Most changes are small UI updates (the typing code card adds a node per letter).
+      const hasNewEffects = mutations.some((mutation) =>
+        Array.from(mutation.addedNodes).some(
+          (node) => node instanceof Element && (node.matches(BINDABLE) || node.querySelector(BINDABLE)),
+        ),
+      );
+      if (!hasNewEffects) return;
 
-        // Layout moved (e.g. a filter removed cards), so trigger positions are stale.
-        const height = content.offsetHeight;
-        if (height !== lastHeight) {
-          lastHeight = height;
-          ScrollTrigger.refresh();
-        }
-      });
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => bindScrollEffects(content, reduced));
     });
 
-    observer.observe(content, { childList: true, subtree: true });
+    // Layout moved (fonts swapped in, a filter removed cards), so trigger positions are stale.
+    // Observing the size, rather than reading it, never forces a layout.
+    let lastHeight = content.offsetHeight;
+    let refreshTimer = 0;
+    const resizeObserver = new ResizeObserver(() => {
+      const height = content.offsetHeight;
+      if (height === lastHeight) return;
+      lastHeight = height;
+      window.clearTimeout(refreshTimer);
+      refreshTimer = window.setTimeout(() => ScrollTrigger.refresh(), REFRESH_DELAY);
+    });
+
+    mutationObserver.observe(content, { childList: true, subtree: true });
+    resizeObserver.observe(content);
     return () => {
-      observer.disconnect();
+      mutationObserver.disconnect();
+      resizeObserver.disconnect();
+      window.clearTimeout(refreshTimer);
       cancelAnimationFrame(frame);
     };
   }, [canBind]);
@@ -333,6 +445,7 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       if (el && !el.isConnected) trigger.kill();
     });
     revertDetachedSplits();
+    releaseObservers();
 
     if (!isFirst) {
       const smoother = ScrollSmoother.get();
@@ -352,7 +465,9 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
   }, [pathname, canBind]);
 
   return (
-    <SmoothReadyContext.Provider value={ready}>
+    // `canBind` rather than `ready`: a context change before the page has hydrated would make
+    // React hydrate all of it in one blocking task, instead of in small steps around the visitor.
+    <SmoothReadyContext.Provider value={canBind}>
       <div id="smooth-wrapper" ref={wrapperRef}>
         <div id="smooth-content" ref={contentRef}>
           <Suspense fallback={null}>

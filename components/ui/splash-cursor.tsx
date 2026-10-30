@@ -51,6 +51,12 @@ const DISPLAY_PASSES = 4;
 /** By this long after the last pointer input the splash has faded out, so the loop can rest. */
 const IDLE_STOP_MS = 4000;
 
+/** Touch screens have no cursor, so the splash trails the finger instead, on a lighter simulation. */
+const TOUCH_ONLY_QUERY = "(hover: none), (pointer: coarse)";
+const TOUCH_DYE_RESOLUTION = 512;
+const TOUCH_IDLE_STOP_MS = 2500;
+const TOUCH_MAX_DABS = 8;
+
 interface WebGLExtensions {
   formatRGBA: { internalFormat: number; format: number };
   formatRG: { internalFormat: number; format: number };
@@ -114,14 +120,6 @@ function SplashCursor({
 }: SplashCursorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isInteractiveHover, setIsInteractiveHover] = useState(false);
-  // A cursor effect: skipped on touch-only devices and for people who prefer reduced motion.
-  const [enabled, setEnabled] = useState(false);
-
-  useEffect(() => {
-    setEnabled(
-      window.matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)").matches,
-    );
-  }, []);
 
   useEffect(() => {
     // Matches the control itself or anything inside it (an icon, a label span), so the
@@ -139,7 +137,8 @@ function SplashCursor({
       if (!e.relatedTarget) setIsInteractiveHover(false);
     };
 
-    if (DISABLE_ON_INTERACTIVE) {
+    // A tap fires a stray mouseover, which would leave the splash hidden with no hover to undo it.
+    if (DISABLE_ON_INTERACTIVE && !window.matchMedia(TOUCH_ONLY_QUERY).matches) {
       document.addEventListener("mouseover", handleMouseOver);
       document.addEventListener("mouseout", handleMouseOut);
 
@@ -152,7 +151,9 @@ function SplashCursor({
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!enabled || !canvas) return;
+    if (!canvas) return;
+
+    const isTouchOnly = window.matchMedia(TOUCH_ONLY_QUERY).matches;
 
     const hashCode = (s: string): number => {
       if (s.length === 0) return 0;
@@ -370,7 +371,16 @@ function SplashCursor({
       };
     };
 
-    const { gl, ext } = getWebGLContext(canvas);
+    let context: WebGLContext;
+    try {
+      context = getWebGLContext(canvas);
+    } catch {
+      // No WebGL here (an old phone, Lockdown Mode): the site simply goes without the splash.
+      return;
+    }
+
+    const { gl, ext } = context;
+    if (isTouchOnly) config.DYE_RESOLUTION = Math.min(config.DYE_RESOLUTION, TOUCH_DYE_RESOLUTION);
     if (!ext.supportLinearFiltering) {
       config.DYE_RESOLUTION = 256;
       config.SHADING = false;
@@ -1113,7 +1123,7 @@ function SplashCursor({
       for (let pass = 0; pass < DISPLAY_PASSES; pass++) render(null);
 
       // Nothing left on screen to animate: rest until the next pointer input.
-      if (Date.now() - lastInputTime > IDLE_STOP_MS) {
+      if (Date.now() - lastInputTime > (isTouchOnly ? TOUCH_IDLE_STOP_MS : IDLE_STOP_MS)) {
         running = false;
         return;
       }
@@ -1371,7 +1381,29 @@ function SplashCursor({
     const splatPointer = (pointer: Pointer) => {
       let dx = pointer.deltaX * config.SPLAT_FORCE;
       let dy = pointer.deltaY * config.SPLAT_FORCE;
-      splat(pointer.texcoordX, pointer.texcoordY, dx, dy, pointer.color);
+      if (!isTouchOnly) {
+        splat(pointer.texcoordX, pointer.texcoordY, dx, dy, pointer.color);
+        return;
+      }
+
+      // While the page scrolls, touch events land far apart: filling the gap between them keeps a
+      // fast swipe one stroke rather than a row of separate dots.
+      const gapX = pointer.texcoordX - pointer.prevTexcoordX;
+      const gapY = pointer.texcoordY - pointer.prevTexcoordY;
+      const gap = Math.hypot(gapX * (canvas.width / canvas.height), gapY);
+      const dabSpacing = Math.sqrt(correctRadius(config.SPLAT_RADIUS / 100.0));
+      const dabs = Math.min(Math.ceil(gap / dabSpacing), TOUCH_MAX_DABS);
+
+      for (let dab = 1; dab <= dabs; dab++) {
+        const along = dab / dabs;
+        splat(
+          pointer.prevTexcoordX + gapX * along,
+          pointer.prevTexcoordY + gapY * along,
+          dx / dabs,
+          dy / dabs,
+          pointer.color,
+        );
+      }
     };
 
     const clickSplat = (pointer: Pointer) => {
@@ -1564,7 +1596,8 @@ function SplashCursor({
     };
 
     const scaleByPixelRatio = (input: number): number => {
-      const pixelRatio = window.devicePixelRatio || 1;
+      // The splash is all soft gradients, so a phone can draw it at CSS pixels and scale it up.
+      const pixelRatio = isTouchOnly ? 1 : window.devicePixelRatio || 1;
       return Math.floor(input * pixelRatio);
     };
 
@@ -1588,43 +1621,56 @@ function SplashCursor({
       wake();
     };
 
+    let hasDragged = false;
     const handleTouchStart = (e: TouchEvent) => {
-      const touches = e.targetTouches;
-      let pointer = pointers[0];
-      for (let i = 0; i < touches.length; i++) {
-        let posX = scaleByPixelRatio(touches[i].clientX);
-        let posY = scaleByPixelRatio(touches[i].clientY);
-        updatePointerDownData(pointer, touches[i].identifier, posX, posY);
+      // The one pointer follows one finger: a pinch would make it jump between the two.
+      if (e.touches.length > 1) {
+        hasDragged = true;
+        return;
       }
+      // The loop may be resting, so nothing else has noticed the first touch or a rotation yet.
+      if (resizeCanvas()) initFramebuffers();
+      hasDragged = false;
+      let touch = e.touches[0];
+      let posX = scaleByPixelRatio(touch.clientX);
+      let posY = scaleByPixelRatio(touch.clientY);
+      updatePointerDownData(pointers[0], touch.identifier, posX, posY);
       wake();
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      const touches = e.targetTouches;
+      if (e.touches.length > 1) return;
+      hasDragged = true;
       let pointer = pointers[0];
-      for (let i = 0; i < touches.length; i++) {
-        let posX = scaleByPixelRatio(touches[i].clientX);
-        let posY = scaleByPixelRatio(touches[i].clientY);
-        updatePointerMoveData(pointer, posX, posY, pointer.color);
-      }
+      let touch = e.touches[0];
+      let posX = scaleByPixelRatio(touch.clientX);
+      let posY = scaleByPixelRatio(touch.clientY);
+      updatePointerMoveData(pointer, posX, posY, pointer.color);
       wake();
     };
 
-    const handleTouchEnd = (e: TouchEvent) => {
-      const touches = e.changedTouches;
+    const handleTouchEnd = () => {
       let pointer = pointers[0];
-      for (let i = 0; i < touches.length; i++) {
-        updatePointerUpData(pointer);
+      updatePointerUpData(pointer);
+      // A tap is the touch version of a click. (Elsewhere it arrives as a real mousedown.)
+      if (isTouchOnly && !hasDragged) {
+        clickSplat(pointer);
+        wake();
       }
     };
 
-    window.addEventListener("mousedown", handleMouseDown);
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("touchstart", handleTouchStart);
-    window.addEventListener("touchmove", handleTouchMove, false);
-    window.addEventListener("touchend", handleTouchEnd);
+    // Taps also fire stray mouse events, which would splash a second time.
+    if (!isTouchOnly) {
+      window.addEventListener("mousedown", handleMouseDown);
+      window.addEventListener("mousemove", handleMouseMove);
+    }
+    // Passive, so that a finger on the page can never make the browser wait before scrolling.
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
 
-    wake();
+    // Phones have nothing to draw until the first touch.
+    if (!isTouchOnly) wake();
 
     return () => {
       cancelAnimationFrame(frameId);
@@ -1649,10 +1695,7 @@ function SplashCursor({
     COLOR_UPDATE_SPEED,
     BACK_COLOR,
     TRANSPARENT,
-    enabled,
   ]);
-
-  if (!enabled) return null;
 
   return (
     <div

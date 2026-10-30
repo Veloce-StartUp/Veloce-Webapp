@@ -37,6 +37,12 @@ const orbitShots = [
   "/hero/logic-leaf-products.jpg",
 ];
 
+/**
+ * Seconds between card placements on touch screens (just under 30fps, so timing jitter can't halve
+ * it). The cards crawl, so this looks the same, and every placement costs a phone a layer rebuild.
+ */
+const TOUCH_PLACE_INTERVAL = 1 / 32;
+
 /** Rings are sized as a fraction of the hero's half-width and squashed into ellipses for depth. */
 const RING_SQUASH = 0.5;
 const rings = [
@@ -111,6 +117,8 @@ export function Hero({
       const cards = gsap.utils.toArray<HTMLElement>(".orbit-card", orbit);
       const ringOutlines = gsap.utils.toArray<HTMLElement>(".orbit-ring", orbit);
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      // On touch the copy animates in CSS: it is the first thing on screen, so it can't wait for this script.
+      const animateCopy = ScrollTrigger.isTouch !== 1;
 
       // Ring radii and the text's clear zone; measured on resize rather than every frame.
       let radii = rings.map(() => ({ x: 0, y: 0 }));
@@ -147,7 +155,9 @@ export function Hero({
           const y = Math.sin(theta) * radii[ring].y * spread;
           card.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) scale(${(0.62 + depth * 0.38).toFixed(3)})`;
           card.style.opacity = ((0.35 + depth * 0.65) * (1 - scrollProgress)).toFixed(3);
-          card.style.zIndex = String(Math.round(depth * 10));
+          // Changes far less often than every frame, and each change restacks the layers.
+          const zIndex = String(Math.round(depth * 10));
+          if (card.style.zIndex !== zIndex) card.style.zIndex = zIndex;
         });
       };
 
@@ -165,8 +175,16 @@ export function Hero({
         return () => resizeObserver.disconnect();
       }
 
+      const placeInterval = ScrollTrigger.isTouch === 1 ? TOUCH_PLACE_INTERVAL : 0;
+      let placedAt = -Infinity;
+      let placedProgress = 0;
       const tick = (time: number) => {
-        if (scrollProgress < 1) placeCards(time);
+        if (scrollProgress >= 1) return;
+        // Scrolling moves the cards a lot further, so that always gets a fresh placement.
+        if (scrollProgress === placedProgress && time - placedAt < placeInterval) return;
+        placedAt = time;
+        placedProgress = scrollProgress;
+        placeCards(time);
       };
       gsap.ticker.add(tick);
 
@@ -193,34 +211,38 @@ export function Hero({
         scrollTrigger: { trigger: root, start: "top top", end: "80% top", scrub: true },
       });
 
-      SplitText.create(titleRef.current!, {
-        type: "lines,words",
-        mask: "lines",
-        autoSplit: true,
-        onSplit(self) {
-          // background-clip text doesn't reach into transformed children, so each word gets the gradient.
-          self.words.forEach((word) => {
-            if (word.closest(".hero-highlight")) word.classList.add("text-gradient-green");
-          });
-          return gsap.from(self.words, {
-            yPercent: 120,
-            rotate: 4,
-            duration: 1.4,
-            ease: "expo.out",
-            stagger: 0.06,
-            delay: 0.25,
-          });
-        },
-      });
-
-      gsap
+      const intro = gsap
         .timeline({ defaults: { ease: "expo.out" } })
         .from(".orbit-card-inner", { scale: 0.4, opacity: 0, duration: 1.6, stagger: 0.05 }, 0)
-        .from(".orbit-rings", { opacity: 0, duration: 2 }, 0)
-        .from("[data-hero='eyebrow']", { y: -20, opacity: 0, duration: 1 }, 0.1)
-        .from("[data-hero='subtitle']", { y: 30, opacity: 0, duration: 1.2 }, 0.7)
-        .from("[data-hero='cta']", { y: 30, opacity: 0, duration: 1.2, stagger: 0.1 }, 0.85)
-        .from("[data-hero='band']", { yPercent: 100, opacity: 0, duration: 1.2 }, 1);
+        .from(".orbit-rings", { opacity: 0, duration: 2 }, 0);
+
+      if (animateCopy) {
+        SplitText.create(titleRef.current!, {
+          type: "lines,words",
+          mask: "lines",
+          autoSplit: true,
+          onSplit(self) {
+            // background-clip text doesn't reach into transformed children, so each word gets the gradient.
+            self.words.forEach((word) => {
+              if (word.closest(".hero-highlight")) word.classList.add("text-gradient-green");
+            });
+            return gsap.from(self.words, {
+              yPercent: 120,
+              rotate: 4,
+              duration: 1.4,
+              ease: "expo.out",
+              stagger: 0.06,
+              delay: 0.25,
+            });
+          },
+        });
+
+        intro
+          .from("[data-hero='eyebrow']", { y: -20, opacity: 0, duration: 1 }, 0.1)
+          .from("[data-hero='subtitle']", { y: 30, opacity: 0, duration: 1.2 }, 0.7)
+          .from("[data-hero='cta']", { y: 30, opacity: 0, duration: 1.2, stagger: 0.1 }, 0.85)
+          .from("[data-hero='band']", { yPercent: 100, opacity: 0, duration: 1.2 }, 1);
+      }
 
       root.classList.add("is-ready");
 
@@ -301,8 +323,7 @@ export function Hero({
                 alt=""
                 width={560}
                 height={286}
-                sizes={`${card.width}px`}
-                loading="eager"
+                sizes={`(max-width: 767px) ${Math.round(card.width * 0.75)}px, ${card.width}px`}
                 className="aspect-[39/20] w-full rounded-lg object-cover object-top"
               />
             </div>

@@ -1,12 +1,18 @@
 "use client"
 
 import { useRef, useState } from "react"
+import dynamic from "next/dynamic"
 import Image from "next/image"
 import { Award, Building2, Maximize2, Trophy } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog"
 import { SectionHeading } from "@/components/section-heading"
 import { gsap, useGSAP } from "@/lib/gsap"
+
+// Rarely opened, so the dialog's code isn't part of the first download.
+const RecognitionLightbox = dynamic(
+    () => import("@/components/recognition-lightbox").then((module) => module.RecognitionLightbox),
+    { ssr: false },
+)
 
 const recognitions = [
   {
@@ -33,11 +39,11 @@ const recognitions = [
   },
 ]
 
-type Recognition = (typeof recognitions)[number]
+export type Recognition = (typeof recognitions)[number]
 
 export function RecognitionSection() {
   const sectionRef = useRef<HTMLElement>(null)
-  const [selected, setSelected] = useState<Recognition>(recognitions[0])
+  const [selected, setSelected] = useState<Recognition | null>(null)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
 
   const openLightbox = (item: Recognition) => {
@@ -102,7 +108,7 @@ export function RecognitionSection() {
                           src={item.image}
                           alt={item.alt}
                           fill
-                          sizes="(min-width: 1024px) 50vw, 100vw"
+                          sizes="(min-width: 1024px) 50vw, calc(100vw - 48px)"
                           className="object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                     </div>
@@ -151,26 +157,9 @@ export function RecognitionSection() {
           </div>
         </div>
 
-        {/* Lightbox */}
-        <Dialog open={isLightboxOpen} onOpenChange={setIsLightboxOpen}>
-          <DialogContent className="glass-strong gap-0 overflow-hidden rounded-3xl border-white/10 bg-black/70 p-0 text-white sm:max-w-5xl [&>button]:rounded-full [&>button]:bg-black/60 [&>button]:p-2 [&>button]:text-white [&>button]:opacity-100 [&>button]:hover:bg-green-600">
-            <div className="relative aspect-[3/2] max-h-[75vh] w-full bg-black">
-              <Image
-                src={selected.image}
-                alt={selected.alt}
-                fill
-                sizes="(min-width: 1024px) 1024px, 100vw"
-                className="object-contain"
-              />
-            </div>
-            <div className="border-t border-white/[0.08] p-4 md:p-6">
-              <DialogTitle className="text-lg text-white md:text-xl">
-                {selected.title} <span className="text-green-400">· {selected.event}</span>
-              </DialogTitle>
-              <DialogDescription className="mt-2 text-gray-300">Awarded by {selected.organizer}</DialogDescription>
-            </div>
-          </DialogContent>
-        </Dialog>
+        {selected && (
+            <RecognitionLightbox item={selected} open={isLightboxOpen} onOpenChange={setIsLightboxOpen} />
+        )}
       </section>
   )
 }

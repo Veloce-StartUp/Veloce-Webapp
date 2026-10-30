@@ -13,6 +13,7 @@ import {
   Ticket,
 } from "lucide-react";
 import { gsap, useGSAP } from "@/lib/gsap";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { SectionHeading } from "@/components/section-heading";
 import { getProjectBySlug, type Project } from "@/lib/projects";
 import { cn } from "@/lib/utils";
@@ -166,8 +167,12 @@ function EditionCard({ project }: { project: Project }) {
   const shots = [project.image, ...project.gallery];
   const [shot, setShot] = useState(0);
   const timer = useRef<number | undefined>(undefined);
+  // The screenshots only cycle on hover, so without a mouse the rest would be wasted downloads.
+  const canHover = useMediaQuery("(hover: hover) and (pointer: fine)");
 
   const startCycling = () => {
+    // A tap also fires mouseenter, and there is only the one screenshot to show.
+    if (!canHover) return;
     window.clearInterval(timer.current);
     timer.current = window.setInterval(() => setShot((index) => (index + 1) % shots.length), 1400);
   };
@@ -191,13 +196,13 @@ function EditionCard({ project }: { project: Project }) {
         className="relative m-2 block aspect-[39/20] overflow-hidden rounded-[1.25rem] bg-black"
         aria-label={`${project.productName} case study`}
       >
-        {shots.map((src, index) => (
+        {(canHover ? shots : shots.slice(0, 1)).map((src, index) => (
           <Image
             key={src}
             src={src}
             alt={`${project.productName} screenshot ${index + 1}`}
             fill
-            sizes="(min-width: 768px) 50vw, 100vw"
+            sizes="(min-width: 768px) 50vw, calc(100vw - 48px)"
             className={cn(
               "object-cover object-top transition-all duration-700",
               index === shot ? "scale-100 opacity-100" : "scale-105 opacity-0",
