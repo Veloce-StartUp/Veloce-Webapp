@@ -158,9 +158,9 @@ export default function WaveSection() {
             />
 
             <div className="container relative z-10 mx-auto lg:w-[70vw] lg:max-w-none">
-                {/* Wave path with green accent: across the full width of the section, shorter on phones */}
+                {/* Wave path with green accent: across the full width of the section */}
                 <div className="mb-16 w-full md:mb-24">
-                    <WavePath className="mx-auto w-[70%] text-green-400 md:w-full" />
+                    <WavePath className="mx-auto w-[85%] text-green-400 md:w-full" />
                 </div>
 
                 <div className="grid items-center gap-14 lg:grid-cols-[auto_1fr] lg:gap-20">
